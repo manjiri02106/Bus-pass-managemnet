@@ -24,7 +24,7 @@ if (empty($code)) {
 
 try {
     $db = Database::connect();
-    
+
     // Fetch pass and passenger details
     $stmt = $db->prepare("
         SELECT p.pass_number, p.start_date, p.end_date, p.status, p.price,

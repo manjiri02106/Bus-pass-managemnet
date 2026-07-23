@@ -14,7 +14,7 @@ $error = '';
 
 try {
     $db = Database::connect();
-    
+
     // Fetch routes
     $stmt = $db->query("SELECT * FROM routes ORDER BY route_code ASC");
     $routes = $stmt->fetchAll();
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $category_id = intval($_POST['category_id'] ?? 0);
     $duration = intval($_POST['duration'] ?? 1);
     $card_number = trim($_POST['card_number'] ?? '');
-    
+
     // Validate inputs
     if ($route_id === 0 || $category_id === 0 || empty($card_number)) {
         $error = 'Please complete all steps and payment fields.';
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $allowed_exts = ['jpg', 'jpeg', 'png'];
             $allowed_mimes = ['image/jpeg', 'image/png', 'image/jpg'];
-            
+
             // Perform security checks
             if (!in_array($file_ext, $allowed_exts)) {
                 $error = 'Only JPG, JPEG, and PNG images are allowed.';
@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (!is_dir($upload_dir)) {
                         mkdir($upload_dir, 0777, true);
                     }
-                    
+
                     // Secure unique name
                     $profile_pic_filename = 'user_' . $user_id . '_' . time() . '.' . $file_ext;
                     if (!move_uploaded_file($file_tmp, $upload_dir . $profile_pic_filename)) {
@@ -179,44 +179,57 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 
     <?php if ($error): ?>
-        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--border-radius-md); padding: 12px; color: var(--color-danger); font-size: 14px; margin-bottom: 20px; text-align: center;">
+        <div
+            style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--border-radius-md); padding: 12px; color: var(--color-danger); font-size: 14px; margin-bottom: 20px; text-align: center;">
             <i class="fas fa-exclamation-triangle"></i> <?= e($error) ?>
         </div>
     <?php endif; ?>
 
     <form class="glass-card multi-step-form" action="apply.php" method="POST" enctype="multipart/form-data">
-        
+
         <!-- STEP 1: Identification & Photo -->
         <div class="step-content active">
-            <h3 class="text-gradient" style="margin-bottom: 15px;"><i class="fas fa-camera"></i> Step 1: Upload Passenger Photo</h3>
-            <p style="color: var(--color-text-muted); font-size: 14px; margin-bottom: 25px;">Please upload a passport-sized profile photo. This photo will be printed directly onto your digital ticket for inspector validation.</p>
-            
+            <h3 class="text-gradient" style="margin-bottom: 15px;"><i class="fas fa-camera"></i> Step 1: Upload
+                Passenger Photo</h3>
+            <p style="color: var(--color-text-muted); font-size: 14px; margin-bottom: 25px;">Please upload a
+                passport-sized profile photo. This photo will be printed directly onto your digital ticket for inspector
+                validation.</p>
+
             <div class="form-group" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                <div id="image-preview" style="width: 140px; height: 140px; border-radius: var(--border-radius-md); border: 2px dashed rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; font-size: 36px; color: var(--color-text-muted);">
+                <div id="image-preview"
+                    style="width: 140px; height: 140px; border-radius: var(--border-radius-md); border: 2px dashed rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; font-size: 36px; color: var(--color-text-muted);">
                     <i class="fas fa-user-circle"></i>
                 </div>
-                <input type="file" id="profile_pic" name="profile_pic" accept="image/png, image/jpeg, image/jpg" class="form-control" style="display: none;" onchange="previewImage(this, 'image-preview')">
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('profile_pic').click()"><i class="fas fa-upload"></i> Choose Photo</button>
-                <span style="font-size: 11px; color: var(--color-text-muted);">Max file size: 2MB. Format: JPG, PNG</span>
+                <input type="file" id="profile_pic" name="profile_pic" accept="image/png, image/jpeg, image/jpg"
+                    class="form-control" style="display: none;" onchange="previewImage(this, 'image-preview')">
+                <button type="button" class="btn btn-secondary"
+                    onclick="document.getElementById('profile_pic').click()"><i class="fas fa-upload"></i> Choose
+                    Photo</button>
+                <span style="font-size: 11px; color: var(--color-text-muted);">Max file size: 2MB. Format: JPG,
+                    PNG</span>
             </div>
 
             <div style="display: flex; justify-content: flex-end; margin-top: 30px;">
-                <button type="button" class="btn btn-primary btn-next">Next Step <i class="fas fa-arrow-right"></i></button>
+                <button type="button" class="btn btn-primary btn-next">Next Step <i
+                        class="fas fa-arrow-right"></i></button>
             </div>
         </div>
 
         <!-- STEP 2: Pass Specs Selection -->
         <div class="step-content">
-            <h3 class="text-gradient" style="margin-bottom: 15px;"><i class="fas fa-sliders-h"></i> Step 2: Choose Route & Category</h3>
-            <p style="color: var(--color-text-muted); font-size: 14px; margin-bottom: 25px;">Select your source, destination, pass discount type, and validity period.</p>
-            
+            <h3 class="text-gradient" style="margin-bottom: 15px;"><i class="fas fa-sliders-h"></i> Step 2: Choose Route
+                & Category</h3>
+            <p style="color: var(--color-text-muted); font-size: 14px; margin-bottom: 25px;">Select your source,
+                destination, pass discount type, and validity period.</p>
+
             <div class="form-group">
                 <label for="route_id" class="form-label">Municipal Transit Route</label>
                 <select id="route_id" name="route_id" class="form-control" required>
                     <option value="" disabled selected>-- Select Route --</option>
                     <?php foreach ($routes as $route): ?>
                         <option value="<?= $route['id'] ?>" data-price="<?= $route['standard_price'] ?>">
-                            <?= e($route['route_code']) ?>: <?= e($route['source']) ?> to <?= e($route['destination']) ?> ($<?= e(number_format($route['standard_price'], 2)) ?>)
+                            <?= e($route['route_code']) ?>: <?= e($route['source']) ?> to <?= e($route['destination']) ?>
+                            ($<?= e(number_format($route['standard_price'], 2)) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -244,24 +257,32 @@ require_once __DIR__ . '/includes/header.php';
             </div>
 
             <div style="display: flex; justify-content: space-between; margin-top: 30px;">
-                <button type="button" class="btn btn-secondary btn-prev"><i class="fas fa-arrow-left"></i> Previous</button>
-                <button type="button" class="btn btn-primary btn-next">Next Step <i class="fas fa-arrow-right"></i></button>
+                <button type="button" class="btn btn-secondary btn-prev"><i class="fas fa-arrow-left"></i>
+                    Previous</button>
+                <button type="button" class="btn btn-primary btn-next">Next Step <i
+                        class="fas fa-arrow-right"></i></button>
             </div>
         </div>
 
         <!-- STEP 3: Simulated Checkout Payment Gateway -->
         <div class="step-content">
-            <h3 class="text-gradient" style="margin-bottom: 15px;"><i class="fas fa-credit-card"></i> Step 3: Fare Payment Simulator</h3>
-            <p style="color: var(--color-text-muted); font-size: 14px; margin-bottom: 25px;">Confirm your pass pricing specifications and complete checkout simulation.</p>
-            
+            <h3 class="text-gradient" style="margin-bottom: 15px;"><i class="fas fa-credit-card"></i> Step 3: Fare
+                Payment Simulator</h3>
+            <p style="color: var(--color-text-muted); font-size: 14px; margin-bottom: 25px;">Confirm your pass pricing
+                specifications and complete checkout simulation.</p>
+
             <!-- Fare Summary Card -->
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--panel-border); border-radius: var(--border-radius-md); padding: 20px; margin-bottom: 25px;">
-                <h4 style="margin-bottom: 15px; font-size: 15px; color: var(--color-text-muted); text-transform: uppercase;">Payment Calculation</h4>
+            <div
+                style="background: rgba(255,255,255,0.03); border: 1px solid var(--panel-border); border-radius: var(--border-radius-md); padding: 20px; margin-bottom: 25px;">
+                <h4
+                    style="margin-bottom: 15px; font-size: 15px; color: var(--color-text-muted); text-transform: uppercase;">
+                    Payment Calculation</h4>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                     <span>Base Fare Subtotal</span>
                     <strong id="calc_base_price">$0.00</strong>
                 </div>
-                <div style="display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--color-success);">
+                <div
+                    style="display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--color-success);">
                     <span>Discount Applied</span>
                     <strong id="calc_discount">-$0.00 (0%)</strong>
                 </div>
@@ -281,7 +302,8 @@ require_once __DIR__ . '/includes/header.php';
 
             <div class="form-group">
                 <label for="card_number" class="form-label">Credit Card Number</label>
-                <input type="text" id="card_number" name="card_number" class="form-control" placeholder="4111 2222 3333 4444" required maxlength="19">
+                <input type="text" id="card_number" name="card_number" class="form-control"
+                    placeholder="4111 2222 3333 4444" required maxlength="19">
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -296,8 +318,10 @@ require_once __DIR__ . '/includes/header.php';
             </div>
 
             <div style="display: flex; justify-content: space-between; margin-top: 30px;">
-                <button type="button" class="btn btn-secondary btn-prev"><i class="fas fa-arrow-left"></i> Previous</button>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-wallet"></i> Pay & Submit Application</button>
+                <button type="button" class="btn btn-secondary btn-prev"><i class="fas fa-arrow-left"></i>
+                    Previous</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-wallet"></i> Pay & Submit
+                    Application</button>
             </div>
         </div>
 

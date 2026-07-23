@@ -7,19 +7,18 @@ require_once __DIR__ . '/../database/db.php';
 
 require_admin();
 
-$error = '';
-$success = '';
-$db = Database::connect();
+$error      = '';
+$success    = '';
+$db         = Database::connect();
 
-// Handle Delete Request
+// ── Handle Delete ──────────────────────────────────────────────────────────────
 if (isset($_GET['delete'])) {
     $delete_id = intval($_GET['delete']);
     try {
-        // Prevent deletion if categories are currently associated with passes
         $stmt = $db->prepare("SELECT COUNT(*) FROM passes WHERE category_id = :id");
         $stmt->execute(['id' => $delete_id]);
         if ($stmt->fetchColumn() > 0) {
-            set_flash_message('error', 'Cannot delete category. It is currently associated with active passenger passes.');
+            set_flash_message('error', 'Cannot delete category — it is associated with existing passes.');
         } else {
             $stmt = $db->prepare("DELETE FROM categories WHERE id = :id");
             $stmt->execute(['id' => $delete_id]);
@@ -31,82 +30,113 @@ if (isset($_GET['delete'])) {
     redirect('/Bus-pass-managemnet/admin/categories.php');
 }
 
-// Handle Add/Insert Form POST
+// ── Handle Add ─────────────────────────────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_category'])) {
-    $name = trim($_POST['name'] ?? '');
+    $name                = trim($_POST['name'] ?? '');
     $discount_percentage = floatval($_POST['discount_percentage'] ?? 0.00);
-    $description = trim($_POST['description'] ?? '');
+    $description         = trim($_POST['description'] ?? '');
 
     if (empty($name) || $discount_percentage < 0 || $discount_percentage > 100) {
-        $error = 'Category name is required. Discount must be a percentage between 0 and 100.';
+        $error = 'Category name is required. Discount must be between 0 and 100.';
     } else {
         try {
-            // Verify unique name
             $stmt = $db->prepare("SELECT id FROM categories WHERE name = :name LIMIT 1");
             $stmt->execute(['name' => $name]);
             if ($stmt->fetch()) {
                 $error = 'A category with this name already exists.';
             } else {
                 $stmt = $db->prepare("
-                    INSERT INTO categories (name, discount_percentage, description) 
+                    INSERT INTO categories (name, discount_percentage, description)
                     VALUES (:name, :discount, :desc)
                 ");
-                $stmt->execute([
-                    'name' => $name,
-                    'discount' => $discount_percentage,
-                    'desc' => $description
-                ]);
+                $stmt->execute(['name' => $name, 'discount' => $discount_percentage, 'desc' => $description]);
                 set_flash_message('success', 'New tier registered successfully.');
                 redirect('/Bus-pass-managemnet/admin/categories.php');
             }
         } catch (Exception $e) {
-            $error = 'Error saving category details: ' . $e->getMessage();
+            $error = 'Error saving category: ' . $e->getMessage();
         }
     }
 }
 
-// Fetch all categories
+// ── Handle Update ──────────────────────────────────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_category'])) {
+    $edit_id             = intval($_POST['edit_id'] ?? 0);
+    $name                = trim($_POST['name'] ?? '');
+    $discount_percentage = floatval($_POST['discount_percentage'] ?? 0.00);
+    $description         = trim($_POST['description'] ?? '');
+
+    if (!$edit_id || empty($name) || $discount_percentage < 0 || $discount_percentage > 100) {
+        $error = 'Category name is required. Discount must be between 0 and 100.';
+    } else {
+        try {
+            // Ensure uniqueness excluding current row
+            $stmt = $db->prepare("SELECT id FROM categories WHERE name = :name AND id != :id LIMIT 1");
+            $stmt->execute(['name' => $name, 'id' => $edit_id]);
+            if ($stmt->fetch()) {
+                $error = 'Another category with this name already exists.';
+            } else {
+                $stmt = $db->prepare("
+                    UPDATE categories
+                    SET name = :name, discount_percentage = :discount, description = :desc
+                    WHERE id = :id
+                ");
+                $stmt->execute([
+                    'name'     => $name,
+                    'discount' => $discount_percentage,
+                    'desc'     => $description,
+                    'id'       => $edit_id,
+                ]);
+                set_flash_message('success', 'Category updated successfully.');
+                redirect('/Bus-pass-managemnet/admin/categories.php');
+            }
+        } catch (Exception $e) {
+            $error = 'Error updating category: ' . $e->getMessage();
+        }
+    }
+}
+
+// ── Fetch all categories ───────────────────────────────────────────────────────
 try {
-    $stmt = $db->query("SELECT * FROM categories ORDER BY discount_percentage DESC");
+    $stmt       = $db->query("SELECT * FROM categories ORDER BY discount_percentage DESC");
     $categories = $stmt->fetchAll();
 } catch (Exception $e) {
-    $error = 'Error listing categories.';
+    $error      = 'Error listing categories.';
+    $categories = [];
 }
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; flex-wrap:wrap; gap:15px;">
     <div>
-        <h1 class="text-gradient">Pass Tiers & Discounts</h1>
-        <p style="color: var(--color-text-muted);">Manage ticket tiers, specific passenger classifications, and discount rules.</p>
+        <h1 class="text-gradient">Pass Tiers &amp; Discounts</h1>
+        <p style="color:var(--color-text-muted);">Manage ticket tiers, passenger classifications, and discount rules.</p>
     </div>
     <button class="btn btn-primary" onclick="openModal('addCatModal')"><i class="fas fa-plus"></i> Register Tier</button>
 </div>
 
 <?php if ($error): ?>
-    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--border-radius-md); padding: 12px; color: var(--color-danger); font-size: 14px; margin-bottom: 20px; text-align: center;">
+    <div style="background:rgba(239,68,68,.1); border:1px solid rgba(239,68,68,.3); border-radius:var(--border-radius-md); padding:12px; color:var(--color-danger); font-size:14px; margin-bottom:20px; text-align:center;">
         <i class="fas fa-exclamation-triangle"></i> <?= e($error) ?>
     </div>
 <?php endif; ?>
 
-<!-- Categories Grid Table -->
+<!-- Categories Table -->
 <div class="glass-card">
     <div class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
                     <th>Category Name</th>
-                    <th>Discount Percentage</th>
+                    <th>Discount</th>
                     <th>Description</th>
-                    <th style="text-align: right;">Operations</th>
+                    <th style="text-align:right;">Operations</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($categories)): ?>
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: var(--color-text-muted);">No categories defined.</td>
-                    </tr>
+                    <tr><td colspan="4" style="text-align:center; color:var(--color-text-muted);">No categories defined.</td></tr>
                 <?php else: ?>
                     <?php foreach ($categories as $cat): ?>
                         <tr>
@@ -118,9 +148,20 @@ require_once __DIR__ . '/../includes/header.php';
                                     <span class="badge badge-secondary">Full Fare (0%)</span>
                                 <?php endif; ?>
                             </td>
-                            <td style="color: var(--color-text-muted); font-size: 13px; max-width: 400px;"><?= e($cat['description']) ?></td>
-                            <td style="text-align: right;">
-                                <a href="categories.php?delete=<?= $cat['id'] ?>" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="return confirm('Are you sure you want to delete category <?= e($cat['name']) ?>?');">
+                            <td style="color:var(--color-text-muted); font-size:13px; max-width:400px;"><?= e($cat['description']) ?></td>
+                            <td style="text-align:right; white-space:nowrap;">
+                                <!-- Edit -->
+                                <button class="btn btn-secondary" style="padding:5px 10px; font-size:12px; margin-right:6px;"
+                                    data-id="<?= (int)$cat['id'] ?>"
+                                    data-name="<?= e($cat['name']) ?>"
+                                    data-discount="<?= e($cat['discount_percentage']) ?>"
+                                    data-description="<?= e($cat['description']) ?>"
+                                    onclick="openEditCategory(this)">
+                                    <i class="fas fa-pen"></i> Edit
+                                </button>
+                                <!-- Delete -->
+                                <a href="categories.php?delete=<?= $cat['id'] ?>" class="btn btn-danger" style="padding:5px 10px; font-size:12px;"
+                                   onclick="return confirm('Delete category <?= e($cat['name']) ?>? This cannot be undone.');">
                                     <i class="fas fa-trash"></i> Delete
                                 </a>
                             </td>
@@ -132,7 +173,7 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<!-- Add Category Modal Dialog -->
+<!-- ── Add Category Modal ────────────────────────────────────────────────────── -->
 <div id="addCatModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -146,12 +187,10 @@ require_once __DIR__ . '/../includes/header.php';
                     <label for="name" class="form-label">Category Name</label>
                     <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Employee Special" required>
                 </div>
-                
                 <div class="form-group">
                     <label for="discount_percentage" class="form-label">Discount Percentage (%)</label>
                     <input type="number" step="0.1" min="0" max="100" id="discount_percentage" name="discount_percentage" class="form-control" placeholder="e.g. 25.0" required>
                 </div>
-
                 <div class="form-group">
                     <label for="description" class="form-label">Description / Eligibility Details</label>
                     <textarea id="description" name="description" rows="3" class="form-control" placeholder="Define who qualifies and proof required..."></textarea>
@@ -165,6 +204,46 @@ require_once __DIR__ . '/../includes/header.php';
     </div>
 </div>
 
-<?php
-require_once __DIR__ . '/../includes/footer.php';
-?>
+<!-- ── Edit Category Modal ───────────────────────────────────────────────────── -->
+<div id="editCatModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Edit Pass Tier</h3>
+            <span class="modal-close" onclick="closeModal('editCatModal')">&times;</span>
+        </div>
+        <form action="categories.php" method="POST">
+            <input type="hidden" name="update_category" value="1">
+            <input type="hidden" name="edit_id" id="edit_cat_id">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit_cat_name" class="form-label">Category Name</label>
+                    <input type="text" id="edit_cat_name" name="name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_cat_discount" class="form-label">Discount Percentage (%)</label>
+                    <input type="number" step="0.1" min="0" max="100" id="edit_cat_discount" name="discount_percentage" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_cat_desc" class="form-label">Description / Eligibility Details</label>
+                    <textarea id="edit_cat_desc" name="description" rows="3" class="form-control"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editCatModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openEditCategory(btn) {
+    document.getElementById('edit_cat_id').value       = btn.dataset.id;
+    document.getElementById('edit_cat_name').value     = btn.dataset.name;
+    document.getElementById('edit_cat_discount').value = btn.dataset.discount;
+    document.getElementById('edit_cat_desc').value     = btn.dataset.description;
+    openModal('editCatModal');
+}
+</script>
+
+<?php require_once __DIR__ . '/../includes/footer.php'; ?>

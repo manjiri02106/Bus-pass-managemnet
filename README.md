@@ -1,6 +1,6 @@
-# OmniPass - NextGen Bus Pass Management System
+# Bus Pass Management System
 
-OmniPass is a modern, high-performance digital bus pass management application built in PHP and MySQL. It features a stunning glassmorphic interface, dynamic fare calculations, automated pass verification APIs (suitable for conductor scanning systems), real-time search/filters, and local testing suites.
+Bus Pass Management System is a modern, high-performance digital bus pass management application built in PHP and MySQL. It features a stunning glassmorphic interface, dynamic fare calculations, automated pass verification APIs (suitable for conductor scanning systems), real-time search/filters, and local testing suites.
 
 ---
 

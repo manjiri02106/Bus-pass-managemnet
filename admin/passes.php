@@ -37,6 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['pas
 
 // Check if this is an AJAX request
 if (isset($_GET['ajax'])) {
+    ob_start(); // Buffer any stray PHP warnings so they don't corrupt JSON
     header('Content-Type: application/json');
 
     $search = trim($_GET['search'] ?? '');
@@ -52,8 +53,10 @@ if (isset($_GET['ajax'])) {
     $params = [];
 
     if (!empty($search)) {
-        $conditions[] = "(u.name LIKE :search OR u.email LIKE :search OR p.pass_number LIKE :search)";
-        $params['search'] = '%' . $search . '%';
+        $conditions[] = "(u.name LIKE :search_name OR u.email LIKE :search_email OR p.pass_number LIKE :search_pass)";
+        $params['search_name']  = '%' . $search . '%';
+        $params['search_email'] = '%' . $search . '%';
+        $params['search_pass']  = '%' . $search . '%';
     }
 
     if (!empty($status)) {
@@ -92,6 +95,7 @@ if (isset($_GET['ajax'])) {
         // Get matching passes
         $data_query = "
             SELECT p.*, u.name AS user_name, u.email AS user_email,
+                   u.profile_pic,
                    r.source, r.destination, r.route_code,
                    c.name AS category_name,
                    pay.transaction_id, pay.status AS payment_status
@@ -108,10 +112,10 @@ if (isset($_GET['ajax'])) {
         $stmt = $db->prepare($data_query);
         // Bind parameters manually for correct integer evaluation
         foreach ($params as $key => $val) {
-            $stmt->bindValue($key, $val);
+            $stmt->bindValue(':' . $key, $val);
         }
-        $stmt->bindValue('limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue('offset', $offset, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
         $passes = $stmt->fetchAll();
 
@@ -195,6 +199,7 @@ if (isset($_GET['ajax'])) {
             $pagination .= '<button class="page-btn" data-page="'.($page + 1).'" '.$next_disabled.'><i class="fas fa-chevron-right"></i></button>';
         }
 
+        ob_clean(); // Discard any buffered warnings before sending clean JSON
         echo json_encode([
             'success' => true,
             'html' => $html,
@@ -202,6 +207,7 @@ if (isset($_GET['ajax'])) {
         ]);
 
     } catch (Exception $e) {
+        ob_clean();
         echo json_encode([
             'success' => false,
             'message' => $e->getMessage()

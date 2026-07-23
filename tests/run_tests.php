@@ -9,11 +9,13 @@ define('CLI_COLOR_RED', "\033[31m");
 define('CLI_COLOR_YELLOW', "\033[33m");
 define('CLI_COLOR_RESET', "\033[0m");
 
-function log_pass($msg) {
+function log_pass($msg)
+{
     echo CLI_COLOR_GREEN . "[PASS] " . CLI_COLOR_RESET . $msg . PHP_EOL;
 }
 
-function log_fail($msg, $reason = '') {
+function log_fail($msg, $reason = '')
+{
     echo CLI_COLOR_RED . "[FAIL] " . CLI_COLOR_RESET . $msg;
     if ($reason) {
         echo " (" . CLI_COLOR_YELLOW . $reason . CLI_COLOR_RESET . ")";
@@ -39,7 +41,7 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
     ]);
     log_pass("Connected to MySQL Server.");
-    
+
     // Re-create temporary test database
     $pdo->exec("DROP DATABASE IF EXISTS `$test_db_name`");
     $pdo->exec("CREATE DATABASE `$test_db_name` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
@@ -96,25 +98,25 @@ try {
     $email = 'tester@gmail.com';
     $raw_pass = 'test1234';
     $hashed_pass = password_hash($raw_pass, PASSWORD_BCRYPT);
-    
+
     $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (:name, :email, :password, 'user')");
     $stmt->execute([
         'name' => 'Test User',
         'email' => $email,
         'password' => $hashed_pass
     ]);
-    
+
     // Fetch and check
     $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
     $stmt->execute(['email' => $email]);
     $user = $stmt->fetch();
-    
+
     if ($user && $user['name'] === 'Test User') {
         log_pass("User insertion verified.");
     } else {
         throw new Exception("Could not retrieve created user record.");
     }
-    
+
     if (password_verify($raw_pass, $user['password'])) {
         log_pass("Password BCRYPT validation verified.");
     } else {
@@ -165,7 +167,7 @@ try {
     if ($pass) {
         $today = date('Y-m-d');
         $valid = ($pass['status'] === 'approved' && $today <= $pass['end_date'] && $today >= $pass['start_date']);
-        
+
         if ($valid && $pass['passenger_name'] === 'Jane Doe') {
             log_pass("QR Validation Service: Verified mock active pass 'VAL-BP-20260721-0001' successfully.");
         } else {
@@ -185,7 +187,8 @@ echo "==================================================" . PHP_EOL;
 echo "All tests finished!" . PHP_EOL;
 echo "==================================================" . PHP_EOL;
 
-function clean_up($pdo, $db_name) {
+function clean_up($pdo, $db_name)
+{
     if ($pdo) {
         try {
             $pdo->exec("DROP DATABASE IF EXISTS `$db_name`");

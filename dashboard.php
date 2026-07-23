@@ -13,7 +13,7 @@ $active_pass = null;
 
 try {
     $db = Database::connect();
-    
+
     // Fetch all passes for this user
     $stmt = $db->prepare("
         SELECT p.*, 
@@ -44,13 +44,15 @@ try {
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+<div
+    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
     <div>
         <h1 class="text-gradient">Welcome back, <?= e($_SESSION['user_name']) ?>!</h1>
         <p style="color: var(--color-text-muted);">Manage your active digital pass and view your booking records.</p>
     </div>
     <div>
-        <a href="/Bus-pass-managemnet/apply.php" class="btn btn-primary"><i class="fas fa-plus"></i> Apply for New Pass</a>
+        <a href="/Bus-pass-managemnet/apply.php" class="btn btn-primary"><i class="fas fa-plus"></i> Apply for New
+            Pass</a>
     </div>
 </div>
 
@@ -64,7 +66,7 @@ require_once __DIR__ . '/includes/header.php';
                 <div class="bus-ticket">
                     <!-- Ticket Header -->
                     <div class="ticket-header">
-                        <span class="ticket-title"><i class="fas fa-bus-alt"></i> OMNIPASS TRANSIT</span>
+                        <span class="ticket-title"><i class="fas fa-bus-alt"></i> BUS PASS MANAGEMENT</span>
                         <div>
                             <?php if ($active_pass['status'] === 'approved'): ?>
                                 <span class="badge badge-success"><i class="fas fa-check-circle"></i> Active</span>
@@ -83,7 +85,9 @@ require_once __DIR__ . '/includes/header.php';
                     <!-- Ticket Body -->
                     <div class="ticket-body">
                         <?php if ($active_pass['profile_pic']): ?>
-                            <img class="ticket-avatar" src="/Bus-pass-managemnet/assets/uploads/<?= e($active_pass['profile_pic']) ?>" alt="Passenger Photo">
+                            <img class="ticket-avatar"
+                                src="/Bus-pass-managemnet/assets/uploads/<?= e($active_pass['profile_pic']) ?>"
+                                alt="Passenger Photo">
                         <?php else: ?>
                             <div class="ticket-avatar-placeholder">
                                 <i class="fas fa-user"></i>
@@ -91,7 +95,8 @@ require_once __DIR__ . '/includes/header.php';
                         <?php endif; ?>
                         <div class="ticket-details">
                             <h4><?= e($_SESSION['user_name']) ?></h4>
-                            <p style="font-weight: 600; color: #8b5cf6; margin-bottom: 2px;"><?= e($active_pass['category_name']) ?></p>
+                            <p style="font-weight: 600; color: #8b5cf6; margin-bottom: 2px;">
+                                <?= e($active_pass['category_name']) ?></p>
                             <p><i class="far fa-envelope"></i> <?= e($_SESSION['user_email']) ?></p>
                         </div>
                     </div>
@@ -134,12 +139,16 @@ require_once __DIR__ . '/includes/header.php';
                         <?php if ($active_pass['status'] === 'approved'): ?>
                             <div class="ticket-qr">
                                 <!-- Secure Dynamic QR code using QR server public API -->
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=<?= urlencode($active_pass['qr_code_data']) ?>&color=090b10" alt="Conductor Scan QR">
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=<?= urlencode($active_pass['qr_code_data']) ?>&color=090b10"
+                                    alt="Conductor Scan QR">
                             </div>
-                            <span style="font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Scan QR for Validity Check</span>
+                            <span
+                                style="font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Scan
+                                QR for Validity Check</span>
                         <?php else: ?>
                             <div style="padding: 20px; text-align: center; color: var(--color-text-muted); font-size: 13px;">
-                                <i class="fas fa-hourglass-half" style="font-size: 24px; color: var(--color-warning); margin-bottom: 8px; display: block;"></i>
+                                <i class="fas fa-hourglass-half"
+                                    style="font-size: 24px; color: var(--color-warning); margin-bottom: 8px; display: block;"></i>
                                 Verification pending. Your QR code will activate upon administrator approval.
                             </div>
                         <?php endif; ?>
@@ -152,15 +161,18 @@ require_once __DIR__ . '/includes/header.php';
         <div class="glass-card" style="text-align: center; padding: 50px 20px;">
             <i class="fas fa-id-card" style="font-size: 48px; color: var(--color-text-muted); margin-bottom: 15px;"></i>
             <h3>No Active Bus Pass</h3>
-            <p style="color: var(--color-text-muted); max-width: 400px; margin: 10px auto 20px;">You do not currently have any active or pending bus passes. Click below to apply for a pass and start saving on your daily transit.</p>
+            <p style="color: var(--color-text-muted); max-width: 400px; margin: 10px auto 20px;">You do not currently have
+                any active or pending bus passes. Click below to apply for a pass and start saving on your daily transit.
+            </p>
             <a href="/Bus-pass-managemnet/apply.php" class="btn btn-primary"><i class="fas fa-plus"></i> Apply for Pass</a>
         </div>
     <?php endif; ?>
 
     <!-- History Panel -->
     <div class="glass-card">
-        <h3 class="text-gradient" style="margin-bottom: 20px;"><i class="fas fa-history"></i> Transit Pass & Billing History</h3>
-        
+        <h3 class="text-gradient" style="margin-bottom: 20px;"><i class="fas fa-history"></i> Transit Pass & Billing
+            History</h3>
+
         <div class="table-responsive">
             <table class="table">
                 <thead>
@@ -178,20 +190,24 @@ require_once __DIR__ . '/includes/header.php';
                 <tbody>
                     <?php if (empty($passes)): ?>
                         <tr>
-                            <td colspan="8" style="text-align: center; color: var(--color-text-muted);">No records found.</td>
+                            <td colspan="8" style="text-align: center; color: var(--color-text-muted);">No records found.
+                            </td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($passes as $p): ?>
                             <tr>
                                 <td style="font-family: monospace; font-weight: 600;"><?= e($p['pass_number']) ?></td>
-                                <td><?= e($p['source']) ?> <i class="fas fa-arrow-right" style="font-size: 10px; color: #8b5cf6;"></i> <?= e($p['destination']) ?></td>
+                                <td><?= e($p['source']) ?> <i class="fas fa-arrow-right"
+                                        style="font-size: 10px; color: #8b5cf6;"></i> <?= e($p['destination']) ?></td>
                                 <td><?= e($p['category_name']) ?></td>
                                 <td style="font-size: 13px;">
-                                    <?= e(date('Y-m-d', strtotime($p['start_date']))) ?> to <?= e(date('Y-m-d', strtotime($p['end_date']))) ?>
+                                    <?= e(date('Y-m-d', strtotime($p['start_date']))) ?> to
+                                    <?= e(date('Y-m-d', strtotime($p['end_date']))) ?>
                                 </td>
                                 <td><strong>$<?= number_format(e($p['price']), 2) ?></strong></td>
                                 <td><?= get_status_badge($p['status']) ?></td>
-                                <td style="font-family: monospace; font-size: 12px;"><?= e($p['transaction_id'] ?? 'N/A') ?></td>
+                                <td style="font-family: monospace; font-size: 12px;"><?= e($p['transaction_id'] ?? 'N/A') ?>
+                                </td>
                                 <td>
                                     <?php if ($p['payment_status'] === 'completed'): ?>
                                         <span class="badge badge-success"><i class="fas fa-check"></i> Paid</span>
