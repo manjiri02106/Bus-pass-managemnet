@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Pass Renewal – Zcoer Bus Pass</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2b7ec1;
+            --primary-dark: #1a5c8a;
+            --primary-light: #e8f4fd;
+            --primary-50: #f0f8ff;
+            --bg: #f0f6fa;
+            --card-bg: #ffffff;
+            --text-dark: #1a2a3a;
+            --text-body: #4a5a6a;
+            --text-muted: #8a9aaa;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.10);
+            --radius: 12px;
+            --radius-lg: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text-body);
+            line-height: 1.6;
+        }
+
+        nav {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 40px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .nav-brand {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 1.1rem; font-weight: 700;
+            color: var(--text-dark); text-decoration: none;
+        }
+        .nav-brand span { color: var(--primary); }
+        .back-link {
+            color: var(--text-muted); text-decoration: none; font-size: 0.875rem;
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .back-link:hover { color: var(--primary); border-color: var(--primary); background: var(--primary-50); }
+
+        .page-wrapper {
+            max-width: 640px;
+            margin: 40px auto;
+            padding: 0 20px 60px;
+        }
+        .page-header { text-align: center; margin-bottom: 36px; }
+        .page-icon {
+            width: 60px; height: 60px;
+            background: var(--primary-light);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px;
+            color: var(--primary);
+        }
+        .page-header h1 {
+            font-size: 1.8rem; font-weight: 800; margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+        .page-header p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .info-box {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+            color: var(--primary-dark);
+            font-size: 0.88rem;
+        }
+        .info-box strong { font-weight: 700; }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--text-body);
+            font-size: 0.85rem;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: var(--bg);
+            color: var(--text-dark);
+            outline: none;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(43,126,193,0.12);
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+        .form-row .form-group { margin-bottom: 0; }
+
+        .alert {
+            padding: 14px 18px; border-radius: 10px;
+            font-size: 0.88rem; font-weight: 500;
+            display: none; margin-bottom: 20px;
+            border: 1px solid;
+        }
+        .alert-success { background: #eafaf1; border-color: #a8e6c1; color: #1a7a42; }
+        .alert-error   { background: #fdecea; border-color: #f5b7b1; color: #922b21; }
+        .alert-info    { background: var(--primary-light); border-color: #aed6f1; color: var(--primary-dark); }
+
+        .btn-container {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+        }
+        button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.25s;
+        }
+        .btn-submit {
+            background: var(--primary);
+            color: white;
+            flex: 1;
+            box-shadow: 0 4px 14px rgba(43,126,193,0.3);
+        }
+        .btn-submit:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-cancel {
+            background: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            flex: 1;
+        }
+        .btn-cancel:hover { border-color: var(--primary); color: var(--primary); }
+
+        .loading { display: none; text-align: center; color: var(--primary); }
+        .spinner {
+            border: 4px solid var(--primary-light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px; height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .success-message { text-align: center; display: none; }
+        .success-message h3 { color: #1a7a42; margin-bottom: 14px; font-size: 1.3rem; }
+        .request-details {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 18px 0;
+            text-align: left;
+        }
+        .request-details p { margin: 8px 0; color: var(--text-body); font-size: 0.9rem; }
+        .request-details strong { color: var(--text-dark); }
+        .status-badge {
+            display: inline-block;
+            background: #fef9e7;
+            color: #7d6608;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+
+        .pass-finder {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+        }
+        .pass-finder h4 {
+            color: var(--text-dark);
+            margin-bottom: 14px;
+            font-size: 0.95rem;
+        }
+        .pass-finder-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 10px;
+        }
+        .btn-find {
+            background: var(--primary);
+            color: white;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+        }
+        .btn-find:hover { background: var(--primary-dark); }
+
+        @media(max-width:600px){
+            .form-card { padding: 24px 18px; }
+            .form-row { grid-template-columns: 1fr; }
+            .pass-finder-group { grid-template-columns: 1fr; }
+            nav { padding: 12px 16px; }
+            .btn-container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="nav-brand">
+            <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="36" height="36" rx="10" fill="#2b7ec1"/>
+                <path d="M10 26V14h16v12H10z" fill="#fff" opacity="0.9"/>
+                <rect x="13" y="16" width="4" height="4" rx="1" fill="#2b7ec1"/>
+                <rect x="19" y="16" width="4" height="4" rx="1" fill="#2b7ec1"/>
+                <rect x="10" y="14" width="16" height="3" rx="1" fill="#1a5c8a"/>
+                <circle cx="13" cy="27" r="2" fill="#fff"/>
+                <circle cx="23" cy="27" r="2" fill="#fff"/>
+            </svg>
+            <span><span>zcoer</span> Bus Pass</span>
+        </a>
+        <a href="../index.html" class="back-link">← Back to Home</a>
+    </nav>
+
+    <div class="page-wrapper">
+        <div class="page-header">
+            <div class="page-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </div>
+            <h1>Request Pass Renewal</h1>
+            <p>Renew your bus pass before it expires</p>
+        </div>
+
+        <div class="form-card">
+            <div id="alert" class="alert"></div>
+
+            <div class="info-box">
+                <strong>Important:</strong> You can request renewal up to 30 days before your pass expires. The renewal process typically takes 2–3 business days.
+            </div>
+
+            <div id="formSection">
+                <div class="pass-finder">
+                    <h4>Find Your Pass</h4>
+                    <div class="pass-finder-group">
+                        <input type="text" id="findPassNumber" placeholder="Pass Number">
+                        <input type="email" id="findEmail" placeholder="Email Address">
+                        <button class="btn-find" onclick="findPass()">Find Pass</button>
+                    </div>
+                </div>
+
+                <form id="renewalForm" style="display:none;">
+                    <div class="form-row">
+                        <div class="form-group"><label>First Name</label><input type="text" id="firstName" readonly></div>
+                        <div class="form-group"><label>Last Name</label><input type="text" id="lastName" readonly></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Email</label><input type="email" id="email" readonly></div>
+                        <div class="form-group"><label>Pass Number</label><input type="text" id="passNumber" readonly></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Pass Type</label><input type="text" id="passType" readonly></div>
+                        <div class="form-group"><label>Current Expiry</label><input type="text" id="expiryDate" readonly></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="renewalReason">Reason for Renewal *</label>
+                        <select id="renewalReason" required>
+                            <option value="">-- Select Reason --</option>
+                            <option value="pass_expiring">Pass is expiring soon</option>
+                            <option value="upgrade_type">Upgrade pass type</option>
+                            <option value="lost_pass">Lost previous pass</option>
+                            <option value="damaged_pass">Damaged pass</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="renewalNotes">Additional Notes</label>
+                        <textarea id="renewalNotes" placeholder="Enter any additional information..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassType">Choose New Pass Type *</label>
+                        <select id="newPassType" required>
+                            <option value="">-- Select Pass Type --</option>
+                            <option value="daily">Daily Pass</option>
+                            <option value="weekly">Weekly Pass</option>
+                            <option value="monthly">Monthly Pass</option>
+                            <option value="quarterly">Quarterly Pass</option>
+                            <option value="annual">Annual Pass</option>
+                        </select>
+                    </div>
+                    <div class="btn-container">
+                        <button type="submit" class="btn-submit">Submit Renewal Request</button>
+                        <button type="button" class="btn-cancel" onclick="resetForm()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="loadingSection" class="loading">
+                <div class="spinner"></div>
+                <p id="loadingText">Processing your request...</p>
+            </div>
+
+            <div id="successSection" class="success-message">
+                <h3>Renewal Request Submitted</h3>
+                <div class="request-details">
+                    <p><strong>Request Reference:</strong> <span id="requestReference"></span></p>
+                    <p><strong>Pass Number:</strong> <span id="successPassNumber"></span></p>
+                    <p><strong>Submitted On:</strong> <span id="submittedDate"></span></p>
+                    <p><strong>New Pass Type:</strong> <span id="successPassType"></span></p>
+                    <div class="status-badge">Status: Pending Review</div>
+                </div>
+                <p style="color: var(--text-muted); margin-top: 18px; font-size: 0.9rem;">
+                    You will receive a confirmation email shortly. Your renewal request will be processed within 2–3 business days.
+                </p>
+                <div class="btn-container" style="margin-top: 18px; justify-content:center;">
+                    <button type="button" class="btn-submit" onclick="location.href='../index.html'" style="flex:0 1 auto;">Back to Home</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPass = null;
+
+        async function findPass() {
+            const passNumber = document.getElementById('findPassNumber').value;
+            const email = document.getElementById('findEmail').value;
+            if (!passNumber && !email) { showAlert('Please enter a Pass Number or Email', 'error'); return; }
+            showLoading(true, 'Finding your pass...');
+            try {
+                let url = '../api/pass.php?action=get_pass';
+                if (passNumber) url += '&pass_number=' + encodeURIComponent(passNumber);
+                if (email) url += '&email=' + encodeURIComponent(email);
+                const response = await fetch(url);
+                const result = await response.json();
+                if (result.success && result.data) {
+                    currentPass = result.data;
+                    populateForm(currentPass);
+                    document.getElementById('renewalForm').style.display = 'block';
+                    showAlert('Pass found! Please fill in the renewal details.', 'info');
+                } else { showAlert('Pass not found. Please check your Pass Number or Email.', 'error'); }
+            } catch (error) { showAlert('Error finding pass: ' + error.message, 'error'); }
+            finally { showLoading(false); }
+        }
+
+        function populateForm(pass) {
+            document.getElementById('firstName').value = pass.first_name || '';
+            document.getElementById('lastName').value = pass.last_name || '';
+            document.getElementById('email').value = pass.email || '';
+            document.getElementById('passNumber').value = pass.pass_number || '';
+            document.getElementById('passType').value = pass.pass_type || '';
+            document.getElementById('expiryDate').value = formatDate(pass.expiry_date);
+        }
+
+        document.getElementById('renewalForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!currentPass) { showAlert('Please find a pass first', 'error'); return; }
+            const reason = document.getElementById('renewalReason').value;
+            const notes = document.getElementById('renewalNotes').value;
+            const newPassType = document.getElementById('newPassType').value;
+            if (!reason || !newPassType) { showAlert('Please fill in all required fields', 'error'); return; }
+            showLoading(true, 'Submitting renewal request...');
+            try {
+                const renewalData = { pass_id: currentPass.id, reason: reason, notes: notes, new_pass_type: newPassType };
+                const response = await fetch('../api/renewal.php?action=create_renewal_request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(renewalData)
+                });
+                const result = await response.json();
+                if (result.success) { displaySuccess(result.data); }
+                else { showAlert('Error: ' + (result.error || 'Failed to submit renewal request'), 'error'); showLoading(false); }
+            } catch (error) { showAlert('Error: ' + error.message, 'error'); showLoading(false); }
+        });
+
+        function displaySuccess(data) {
+            showLoading(false);
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('successSection').style.display = 'block';
+            document.getElementById('alert').style.display = 'none';
+            document.getElementById('requestReference').textContent = data.request_id || 'REQ-' + Date.now();
+            document.getElementById('successPassNumber').textContent = currentPass.pass_number;
+            document.getElementById('submittedDate').textContent = formatDate(new Date());
+            document.getElementById('successPassType').textContent = document.getElementById('newPassType').value;
+        }
+
+        function resetForm() {
+            document.getElementById('renewalForm').reset();
+            document.getElementById('renewalForm').style.display = 'none';
+            document.getElementById('findPassNumber').value = '';
+            document.getElementById('findEmail').value = '';
+            document.getElementById('alert').style.display = 'none';
+            currentPass = null;
+        }
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('alert');
+            alertDiv.textContent = message; alertDiv.className = 'alert alert-' + type; alertDiv.style.display = 'block';
+        }
+        function showLoading(show, text) {
+            document.getElementById('loadingSection').style.display = show ? 'block' : 'none';
+            if (text) document.getElementById('loadingText').textContent = text;
+        }
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN');
+        }
+    </script>
+</body>
+</html>
+

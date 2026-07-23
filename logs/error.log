@@ -1,0 +1,52 @@
+[20-Jul-2026 21:52:10 Europe/Berlin] PHP Warning:  Undefined array key "REQUEST_METHOD" in C:\xampp\htdocs\Bus-pass-managemnet\api\renewal.php on line 14
+[20-Jul-2026 22:33:49 Europe/Berlin] PHP Warning:  Uncaught mysqli_sql_exception: MySQL server has gone away in C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php:137
+Stack trace:
+#0 C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php(137): mysqli->prepare('SELECT * FROM u...')
+#1 C:\xampp\htdocs\Bus-pass-managemnet\classes\User.php(76): Database->prepare('SELECT * FROM u...')
+#2 C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php(93): User->getUserByEmail('ayushtipole9999...')
+#3 C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php(22): generatePass()
+#4 {main}
+  thrown in C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php on line 137
+[20-Jul-2026 22:33:49 Europe/Berlin] PHP Warning:  Uncaught mysqli_sql_exception: MySQL server has gone away in C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php:137
+Stack trace:
+#0 C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php(137): mysqli->prepare('UPDATE bus_pass...')
+#1 C:\xampp\htdocs\Bus-pass-managemnet\classes\BusPass.php(149): Database->prepare('UPDATE bus_pass...')
+#2 C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php(145): BusPass->updatePassQRCode(4, 'C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php(22): generatePass()
+#4 {main}
+  thrown in C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php on line 137
+[20-Jul-2026 22:33:49 Europe/Berlin] PHP Warning:  Uncaught mysqli_sql_exception: MySQL server has gone away in C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php:137
+Stack trace:
+#0 C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php(137): mysqli->prepare('SELECT * FROM u...')
+#1 C:\xampp\htdocs\Bus-pass-managemnet\classes\User.php(76): Database->prepare('SELECT * FROM u...')
+#2 C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php(93): User->getUserByEmail('ayushtipole9999...')
+#3 C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php(22): generatePass()
+#4 {main}
+  thrown in C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php on line 137
+[20-Jul-2026 22:33:49 Europe/Berlin] PHP Warning:  Uncaught mysqli_sql_exception: MySQL server has gone away in C:\xampp\htdocs\Bus-pass-managemnet\classes\User.php:78
+Stack trace:
+#0 C:\xampp\htdocs\Bus-pass-managemnet\classes\User.php(78): mysqli_stmt->execute()
+#1 C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php(93): User->getUserByEmail('ayushtipole9999...')
+#2 C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php(22): generatePass()
+#3 {main}
+  thrown in C:\xampp\htdocs\Bus-pass-managemnet\classes\User.php on line 78
+[20-Jul-2026 22:33:49 Europe/Berlin] PHP Warning:  Uncaught mysqli_sql_exception: MySQL server has gone away in C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php:137
+Stack trace:
+#0 C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php(137): mysqli->prepare('SELECT * FROM u...')
+#1 C:\xampp\htdocs\Bus-pass-managemnet\classes\User.php(76): Database->prepare('SELECT * FROM u...')
+#2 C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php(93): User->getUserByEmail('ayushtipole9999...')
+#3 C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php(22): generatePass()
+#4 {main}
+  thrown in C:\xampp\htdocs\Bus-pass-managemnet\classes\Database.php on line 137
+[20-Jul-2026 22:33:49 Europe/Berlin] PHP Fatal error:  Maximum execution time of 120 seconds exceeded in C:\xampp\htdocs\Bus-pass-managemnet\classes\User.php on line 76
+[20-Jul-2026 22:33:49 Europe/Berlin] PHP Fatal error:  Maximum execution time of 120 seconds exceeded in C:\xampp\htdocs\Bus-pass-managemnet\classes\BusPass.php on line 149
+[20-Jul-2026 22:33:49 Europe/Berlin] PHP Fatal error:  Maximum execution time of 120 seconds exceeded in C:\xampp\htdocs\Bus-pass-managemnet\classes\User.php on line 76
+[20-Jul-2026 22:33:49 Europe/Berlin] PHP Fatal error:  Maximum execution time of 120 seconds exceeded in C:\xampp\htdocs\Bus-pass-managemnet\classes\User.php on line 76
+[20-Jul-2026 22:33:49 Europe/Berlin] PHP Fatal error:  Maximum execution time of 120 seconds exceeded in C:\xampp\htdocs\Bus-pass-managemnet\api\pass.php on line 93
+[21-Jul-2026 07:04:03 Europe/Berlin] PHP Fatal error:  Cannot redeclare BusPass::updatePassQRCode() in C:\xampp\htdocs\Bus-pass-managemnet\classes\BusPass.php on line 301
+[21-Jul-2026 07:10:12 Europe/Berlin] PHP Fatal error:  Uncaught Error: Call to undefined function imagecreatetruecolor() in C:\xampp\htdocs\Bus-pass-managemnet\classes\PassDownloadManager.php:185
+Stack trace:
+#0 C:\xampp\htdocs\Bus-pass-managemnet\scratch\test_all_classes.php(59): PassDownloadManager->generatePassImage(12, 'png')
+#1 {main}
+  thrown in C:\xampp\htdocs\Bus-pass-managemnet\classes\PassDownloadManager.php on line 185
+[21-Jul-2026 07:10:29 Europe/Berlin] PHP Warning:  Undefined array key "phone" in C:\xampp\htdocs\Bus-pass-managemnet\classes\RenewalApprovalWorkflow.php on line 327

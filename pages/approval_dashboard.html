@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renewal Approval Dashboard – Zcoer Bus Pass</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2b7ec1;
+            --primary-dark: #1a5c8a;
+            --primary-light: #e8f4fd;
+            --primary-50: #f0f8ff;
+            --bg: #f0f6fa;
+            --card-bg: #ffffff;
+            --text-dark: #1a2a3a;
+            --text-body: #4a5a6a;
+            --text-muted: #8a9aaa;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.10);
+            --radius: 12px;
+            --radius-lg: 20px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text-body);
+            line-height: 1.6;
+        }
+
+        nav {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 40px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .nav-brand {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 1.1rem; font-weight: 700;
+            color: var(--text-dark); text-decoration: none;
+        }
+        .nav-brand span { color: var(--primary); }
+        .back-link {
+            color: var(--text-muted); text-decoration: none; font-size: 0.875rem;
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .back-link:hover { color: var(--primary); border-color: var(--primary); background: var(--primary-50); }
+
+        .container { max-width: 1100px; margin: 40px auto; padding: 0 20px 60px; }
+
+        .page-header { text-align: center; margin-bottom: 36px; }
+        .page-icon {
+            width: 60px; height: 60px;
+            background: var(--primary-light);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px;
+            color: var(--primary);
+        }
+        .page-header h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; color: var(--text-dark); }
+        .page-header p { color: var(--text-muted); font-size: 0.95rem; }
+
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .dashboard-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+        }
+        .dashboard-header h2 { font-size: 1.2rem; font-weight: 700; color: var(--text-dark); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+        .stat-card h3 { font-size: 2rem; font-weight: 800; margin-bottom: 6px; }
+        .stat-card p { opacity: 0.85; font-size: 0.85rem; font-weight: 500; }
+
+        .filter-section {
+            background: var(--bg);
+            padding: 18px 20px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-section select {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background: var(--card-bg);
+            color: var(--text-dark);
+            outline: none;
+        }
+        .filter-section select:focus { border-color: var(--primary); }
+
+        .alert {
+            padding: 14px 18px; border-radius: 10px;
+            font-size: 0.88rem; font-weight: 500;
+            display: none; margin-bottom: 20px;
+            border: 1px solid;
+        }
+        .alert-success { background: #eafaf1; border-color: #a8e6c1; color: #1a7a42; }
+        .alert-error   { background: #fdecea; border-color: #f5b7b1; color: #922b21; }
+        .alert-info    { background: var(--primary-light); border-color: #aed6f1; color: var(--primary-dark); }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        table { width: 100%; border-collapse: collapse; background: var(--card-bg); }
+        thead { background: var(--bg); border-bottom: 2px solid var(--border); }
+        th { padding: 14px; text-align: left; font-weight: 600; color: var(--text-dark); font-size: 0.85rem; }
+        td { padding: 14px; border-bottom: 1px solid var(--border); color: var(--text-body); font-size: 0.88rem; }
+        tr:hover { background: var(--primary-50); }
+        .status-badge {
+            display: inline-block; padding: 4px 12px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 600;
+        }
+        .status-pending { background: #fef9e7; color: #7d6608; }
+        .status-approved { background: #eafaf1; color: #1a7a42; }
+        .status-rejected { background: #fdecea; color: #922b21; }
+
+        .btn-group { display: flex; gap: 6px; }
+        .btn {
+            padding: 6px 14px; border: none; border-radius: 8px;
+            cursor: pointer; font-weight: 600; font-size: 0.8rem;
+            font-family: 'Inter', sans-serif; transition: all 0.2s;
+        }
+        .btn-approve { background: #eafaf1; color: #1a7a42; }
+        .btn-approve:hover { background: #d5f0e3; }
+        .btn-reject { background: #fdecea; color: #922b21; }
+        .btn-reject:hover { background: #f8d7da; }
+        .btn-view { background: var(--primary-light); color: var(--primary); }
+        .btn-view:hover { background: #d4eaf9; }
+        .btn-refresh {
+            padding: 10px 20px; background: var(--primary); color: white;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+            font-family: 'Inter', sans-serif; font-size: 0.85rem; transition: all 0.2s;
+        }
+        .btn-refresh:hover { background: var(--primary-dark); }
+
+        .loading { text-align: center; padding: 40px; color: var(--primary); }
+        .spinner {
+            border: 4px solid var(--primary-light); border-top: 4px solid var(--primary);
+            border-radius: 50%; width: 36px; height: 36px;
+            animation: spin 1s linear infinite; margin: 0 auto 14px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
+        .empty-state h3 { color: var(--text-body); margin-bottom: 8px; }
+
+        @media(max-width:768px){
+            .form-card { padding: 20px 16px; }
+            nav { padding: 12px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="nav-brand">
+            <svg width="28" height="28" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="36" height="36" rx="10" fill="#2b7ec1"/>
+                <path d="M10 26V14h16v12H10z" fill="#fff" opacity="0.9"/>
+                <rect x="13" y="16" width="4" height="4" rx="1" fill="#2b7ec1"/>
+                <rect x="19" y="16" width="4" height="4" rx="1" fill="#2b7ec1"/>
+                <rect x="10" y="14" width="16" height="3" rx="1" fill="#1a5c8a"/>
+                <circle cx="13" cy="27" r="2" fill="#fff"/>
+                <circle cx="23" cy="27" r="2" fill="#fff"/>
+            </svg>
+            <span><span>zcoer</span> Bus Pass</span>
+        </a>
+        <a href="../index.html" class="back-link">← Back to Home</a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div class="page-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h1>Renewal Approval Dashboard</h1>
+            <p>Review and manage pass renewal requests</p>
+        </div>
+
+        <div class="form-card">
+            <div id="alert" class="alert alert-info"></div>
+
+            <div class="dashboard-header">
+                <h2>Renewal Requests</h2>
+                <button class="back-link" onclick="location.href='../index.html'" style="font-size:0.85rem; border:1px solid var(--border); padding:8px 16px; border-radius:8px;">← Back to Home</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card"><h3 id="totalRequests">0</h3><p>Total Requests</p></div>
+                <div class="stat-card"><h3 id="pendingRequests">0</h3><p>Pending</p></div>
+                <div class="stat-card"><h3 id="approvedRequests">0</h3><p>Approved</p></div>
+                <div class="stat-card"><h3 id="rejectedRequests">0</h3><p>Rejected</p></div>
+            </div>
+
+            <div class="filter-section">
+                <select id="statusFilter" onchange="loadRequests()">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+                <button class="btn-refresh" onclick="loadRequests()">Refresh</button>
+            </div>
+
+            <div id="loadingSection" class="loading" style="display:none;">
+                <div class="spinner"></div>
+                <p>Loading renewal requests...</p>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display:none;">
+                <h3>No renewal requests found</h3>
+                <p>There are currently no renewal requests to review.</p>
+            </div>
+
+            <div class="table-container" id="tableContainer" style="display:none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Request ID</th>
+                            <th>Passenger Name</th>
+                            <th>Pass Number</th>
+                            <th>Reason</th>
+                            <th>Request Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadRequests() {
+            showLoading(true);
+            try {
+                const status = document.getElementById('statusFilter').value;
+                let url = '../api/renewal.php?action=get_renewal_requests';
+                if (status) url += '&status=' + status;
+                const response = await fetch(url);
+                const result = await response.json();
+                if (result.success && result.data) {
+                    const requests = Array.isArray(result.data) ? result.data : [result.data];
+                    displayRequests(requests);
+                    updateStats(requests);
+                } else {
+                    document.getElementById('emptyState').style.display = 'block';
+                    document.getElementById('tableContainer').style.display = 'none';
+                }
+            } catch (error) {
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('tableContainer').style.display = 'none';
+            } finally { showLoading(false); }
+        }
+
+        function displayRequests(requests) {
+            if (requests.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('tableContainer').style.display = 'none'; return;
+            }
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'block';
+            const tbody = document.getElementById('requestsTableBody');
+            tbody.innerHTML = requests.map(req => `
+                <tr>
+                    <td>${req.id || 'N/A'}</td>
+                    <td>${req.first_name} ${req.last_name}</td>
+                    <td>${req.pass_number || 'N/A'}</td>
+                    <td>${req.reason || 'N/A'}</td>
+                    <td>${formatDate(req.created_at)}</td>
+                    <td><span class="status-badge status-${req.status || 'pending'}">${(req.status || 'pending').toUpperCase()}</span></td>
+                    <td>
+                        <div class="btn-group">
+                            ${req.status === 'pending' ? `
+                                <button class="btn btn-approve" onclick="approveRequest(${req.id})">Approve</button>
+                                <button class="btn btn-reject" onclick="rejectRequest(${req.id})">Reject</button>
+                            ` : ''}
+                            <button class="btn btn-view" onclick="viewDetails(${req.id})">View</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateStats(requests) {
+            document.getElementById('totalRequests').textContent = requests.length;
+            document.getElementById('pendingRequests').textContent = requests.filter(r => r.status === 'pending').length;
+            document.getElementById('approvedRequests').textContent = requests.filter(r => r.status === 'approved').length;
+            document.getElementById('rejectedRequests').textContent = requests.filter(r => r.status === 'rejected').length;
+        }
+
+        async function approveRequest(requestId) {
+            if (confirm('Are you sure you want to approve this renewal request?')) {
+                try {
+                    const response = await fetch('../api/renewal.php?action=approve_renewal_request', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ request_id: requestId })
+                    });
+                    const result = await response.json();
+                    if (result.success) { showAlert('Request approved successfully', 'info'); loadRequests(); }
+                    else { showAlert('Error: ' + (result.error || 'Failed to approve'), 'error'); }
+                } catch (error) { showAlert('Error: ' + error.message, 'error'); }
+            }
+        }
+
+        async function rejectRequest(requestId) {
+            if (confirm('Are you sure you want to reject this renewal request?')) {
+                try {
+                    const response = await fetch('../api/renewal.php?action=reject_renewal_request', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ request_id: requestId })
+                    });
+                    const result = await response.json();
+                    if (result.success) { showAlert('Request rejected successfully', 'info'); loadRequests(); }
+                    else { showAlert('Error: ' + (result.error || 'Failed to reject'), 'error'); }
+                } catch (error) { showAlert('Error: ' + error.message, 'error'); }
+            }
+        }
+
+        function viewDetails(requestId) {
+            showAlert('Details view for request #' + requestId + '. Full functionality available in production.', 'info');
+        }
+        function showLoading(show) {
+            document.getElementById('loadingSection').style.display = show ? 'block' : 'none';
+        }
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message; alert.className = 'alert alert-' + type; alert.style.display = 'block';
+        }
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN');
+        }
+        loadRequests();
+    </script>
+</body>
+</html>
+

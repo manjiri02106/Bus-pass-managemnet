@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zcoer Bus Pass – Digital Bus Pass Management</title>
+    <meta name="description" content="Manage your digital bus pass with QR code, renewal, verification and analytics – all in one place.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2b7ec1;
+            --primary-dark: #1a5c8a;
+            --primary-light: #e8f4fd;
+            --primary-50: #f0f8ff;
+            --secondary: #4a9bd9;
+            --accent: #f5a623;
+            --accent-hover: #e09515;
+            --bg: #f0f6fa;
+            --card-bg: #ffffff;
+            --text-dark: #1a2a3a;
+            --text-body: #4a5a6a;
+            --text-muted: #8a9aaa;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 30px rgba(0,0,0,0.10);
+            --radius: 12px;
+            --radius-lg: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text-body);
+            line-height: 1.6;
+        }
+
+        /* NAVBAR */
+        nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 60px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+        .nav-brand svg {
+            flex-shrink: 0;
+        }
+        .nav-brand .brand-text {
+            font-size: 1.2rem;
+            letter-spacing: -0.3px;
+        }
+        .nav-brand .brand-text span {
+            color: var(--primary);
+        }
+        .nav-links {
+            display: flex;
+            gap: 4px;
+        }
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover {
+            color: var(--primary);
+            background: var(--primary-50);
+        }
+
+        /* HERO */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 60px;
+            background: linear-gradient(160deg, var(--primary-50) 0%, #ffffff 100%);
+        }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary-light);
+            border: 1px solid rgba(43,126,193,0.25);
+            color: var(--primary);
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+            letter-spacing: -1px;
+        }
+        .hero h1 span {
+            color: var(--primary);
+        }
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 560px;
+            margin: 0 auto 36px;
+            line-height: 1.7;
+        }
+        .hero-cta {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: var(--radius);
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(43,126,193,0.35);
+            transition: all 0.25s;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(43,126,193,0.4);
+        }
+        .btn-outline {
+            background: var(--card-bg);
+            color: var(--text-dark);
+            padding: 14px 32px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s;
+        }
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-50);
+            transform: translateY(-2px);
+        }
+
+        /* STATS STRIP */
+        .stats-strip {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            padding: 32px 20px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+        }
+        .stat-item { text-align: center; }
+        .stat-item .num {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .stat-item .label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        /* SECTION TITLE */
+        .section-title {
+            text-align: center;
+            padding: 48px 20px 40px;
+        }
+        .section-title h2 {
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* FEATURE CARDS */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px 60px;
+        }
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 32px 28px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+            box-shadow: var(--shadow-sm);
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+        .card-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .card-icon svg { flex-shrink: 0; }
+        .feature-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            margin-bottom: 22px;
+        }
+        .card-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: var(--primary-50);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+        .card-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            transform: translateX(4px);
+        }
+
+        /* HOW IT WORKS */
+        .how-section {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 30px 70px;
+        }
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .step {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .step-num {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+        .step-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 24px;
+            flex: 1;
+        }
+        .step-content h4 {
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 1rem;
+            color: var(--text-dark);
+        }
+        .step-content p {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.6;
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 32px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--card-bg);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        footer .footer-brand {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+        footer .footer-brand span { color: var(--primary); }
+
+        @media (max-width: 768px) {
+            nav { padding: 14px 20px; }
+            .nav-links { display: none; }
+            .stats-strip { gap: 24px; flex-wrap: wrap; padding: 24px 16px; }
+            .features-grid { padding: 0 16px 40px; }
+            .step { flex-direction: column; }
+            .how-section { padding: 0 16px 50px; }
+            .hero { padding: 50px 16px 40px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav>
+        <a href="index.html" class="nav-brand">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="36" height="36" rx="10" fill="#2b7ec1"/>
+                <path d="M10 26V14h16v12H10z" fill="#fff" opacity="0.9"/>
+                <rect x="13" y="16" width="4" height="4" rx="1" fill="#2b7ec1"/>
+                <rect x="19" y="16" width="4" height="4" rx="1" fill="#2b7ec1"/>
+                <rect x="10" y="14" width="16" height="3" rx="1" fill="#1a5c8a"/>
+                <circle cx="13" cy="27" r="2" fill="#fff"/>
+                <circle cx="23" cy="27" r="2" fill="#fff"/>
+            </svg>
+            <span class="brand-text"><span>zcoer</span> Bus Pass</span>
+        </a>
+        <div class="nav-links">
+            <a href="pages/generate_pass.html">Generate</a>
+            <a href="pages/download_pass.html">Download</a>
+            <a href="pages/verify_pass.html">Verify</a>
+            <a href="pages/analytics.html">Analytics</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Smart Digital Transit Solution
+        </div>
+        <h1>Your Digital Bus Pass,<br><span>Reimagined</span></h1>
+        <p>Generate, download, and verify bus passes instantly — powered by QR codes and a seamless digital experience.</p>
+        <div class="hero-cta">
+            <a href="pages/generate_pass.html" class="btn-primary">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Get Your Pass
+            </a>
+            <a href="pages/verify_pass.html" class="btn-outline">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                Verify a Pass
+            </a>
+        </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="stats-strip">
+        <div class="stat-item">
+            <div class="num">100%</div>
+            <div class="label">Paperless &amp; Digital</div>
+        </div>
+        <div class="stat-item">
+            <div class="num">QR</div>
+            <div class="label">Instant Verification</div>
+        </div>
+        <div class="stat-item">
+            <div class="num">3</div>
+            <div class="label">Download Formats</div>
+        </div>
+        <div class="stat-item">
+            <div class="num">24/7</div>
+            <div class="label">Always Available</div>
+        </div>
+    </div>
+
+    <!-- FEATURES -->
+    <div class="section-title">
+        <h2>Everything You Need</h2>
+        <p>A complete bus pass management system built for speed, simplicity and reliability.</p>
+    </div>
+
+    <div class="features-grid">
+
+        <div class="feature-card" onclick="location.href='pages/generate_pass.html'">
+            <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h3>Generate Bus Pass</h3>
+            <p>Create a personalised digital bus pass with a unique number and auto-generated QR code within seconds.</p>
+            <button class="card-btn" onclick="event.stopPropagation(); location.href='pages/generate_pass.html'">
+                Get Started
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <div class="feature-card" onclick="location.href='pages/download_pass.html'">
+            <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <h3>Download &amp; Print</h3>
+            <p>Download your pass as PDF, PNG, or JPG. Print it or keep it digital — always ready when you need it.</p>
+            <button class="card-btn" onclick="event.stopPropagation(); location.href='pages/download_pass.html'">
+                Download
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <div class="feature-card" onclick="location.href='pages/renewal_request.html'">
+            <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </div>
+            <h3>Renewal Request</h3>
+            <p>Request a pass renewal before expiry. Track your request status in real-time with instant notifications.</p>
+            <button class="card-btn" onclick="event.stopPropagation(); location.href='pages/renewal_request.html'">
+                Renew Now
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <div class="feature-card" onclick="location.href='pages/approval_dashboard.html'">
+            <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h3>Approval Dashboard</h3>
+            <p>Admin panel to review, approve or reject renewal requests with full workflow tracking and audit logs.</p>
+            <button class="card-btn" onclick="event.stopPropagation(); location.href='pages/approval_dashboard.html'">
+                Manage
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <div class="feature-card" onclick="location.href='pages/verify_pass.html'">
+            <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </div>
+            <h3>Verify Pass</h3>
+            <p>Instantly verify any bus pass by entering the pass number or scanning its QR code for authenticity.</p>
+            <button class="card-btn" onclick="event.stopPropagation(); location.href='pages/verify_pass.html'">
+                Verify
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+        </div>
+
+        <div class="feature-card" onclick="location.href='pages/analytics.html'">
+            <div class="card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <h3>Analytics &amp; Stats</h3>
+            <p>View rich dashboards with pass issuance trends, active passes, expiring passes and renewal statistics.</p>
+            <button class="card-btn" onclick="event.stopPropagation(); location.href='pages/analytics.html'">
+                View Stats
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="section-title">
+        <h2>How It Works</h2>
+        <p>Three simple steps to get your digital bus pass.</p>
+    </div>
+    <div class="how-section">
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <h4>Fill in your details</h4>
+                    <p>Enter your personal information and choose your pass type — daily, weekly, monthly, quarterly, or annual.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <h4>Get your QR-coded pass instantly</h4>
+                    <p>A unique pass number and QR code are generated automatically and linked to your profile.</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <h4>Download &amp; use anywhere</h4>
+                    <p>Save as PDF or image, print it out, or show the QR code directly from your phone for instant verification.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-brand"><span>zcoer</span> Bus Pass</div>
+        <p>&copy; 2026 Zcoer Bus Pass Management System. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
+
