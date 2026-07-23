@@ -1,25 +1,16 @@
-# Bus Pass Management System - Development Progress
+# Payment Feature Implementation - TODO
 
-## Task List
+## Step 1: Update `apply_pass.php`
+- [x] Add Step 4 "Payment" to the step wizard UI
+- [x] Change Step 3 "Submit Application" button to "Proceed to Payment →"
+- [x] Add Step 4 content: Payment summary, payment method selection
+- [x] Add payment form fields (Card/UPI/Net Banking sections)
+- [x] Update PHP processing: Handle payment, insert into both bus_passes and payments tables
+- [x] Update JavaScript: 4-step navigation, payment method switching, card input formatting
 
-### Phase 1: Core Student Pages ✅
-- [x] **dashboard.php** - Student dashboard with stats
-- [x] **apply_pass.php** - Bus pass application with document upload
-- [x] **my_applications.php** - Application listing with DataTable
-- [x] **notifications.php** - Notifications page
-- [x] **profile.php** - View/Edit profile
-- [x] **change_password.php** - Change password
-- [x] **forgot_password.php** - Password reset flow
+## Step 2: Update `assets/css/style.css`
+- [x] Add styles for payment form, payment methods, card preview
 
-### Phase 2: Pass Management Pages ✅
-- [x] **renew_pass.php** - Pass renewal
-- [x] **download_pass.php** - Download/Print pass card
-- [x] **payment_status.php** - Payment status/history
-
-### Phase 3: Additional Pages ✅
-- [x] **reset_password.php** - Complete password reset with token
-
-### Phase 4: Infrastructure ✅
-- [x] **uploads/** directory for document storage
-- [x] **assets/images/default.png** - Default profile picture placeholder
+## Step 3: Create TODO.md (this file)
+- [ ] Track progress
 

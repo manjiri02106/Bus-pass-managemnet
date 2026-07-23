@@ -45,20 +45,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['renew_pass'])) {
             $fee = calculatePassFee($route['fare'], $pass_type);
             $validity = calculateValidity($pass_type);
             $app_no = generateApplicationNo($student_id);
+            $payment_status = 'Pending';
 
-            $query = "INSERT INTO bus_passes (application_no, student_id, route_id, pass_type, fee, valid_from, valid_until, status) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')";
+            $query = "INSERT INTO bus_passes (application_no, student_id, route_id, pass_type, fee, valid_from, valid_until, status, payment_status) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending', ?)";
             $stmt = mysqli_prepare($conn, $query);
-            mysqli_stmt_bind_param($stmt, 'siissss', $app_no, $student_id, $route_id, $pass_type, $fee, $validity['from'], $validity['until']);
+            mysqli_stmt_bind_param($stmt, 'siisssss', $app_no, $student_id, $route_id, $pass_type, $fee, $validity['from'], $validity['until'], $payment_status);
 
             if (mysqli_stmt_execute($stmt)) {
+                $pass_id = mysqli_insert_id($conn);
                 // Notification
-                $notif_q = "INSERT INTO notifications (student_id, title, message, type) VALUES (?, 'Renewal Submitted', 'Your bus pass renewal application (Ref: $app_no) has been submitted successfully.', 'info')";
+                $notif_q = "INSERT INTO notifications (student_id, title, message, type) VALUES (?, 'Renewal Submitted', 'Your bus pass renewal application (Ref: $app_no) has been submitted successfully. Please complete the payment.', 'info')";
                 $notif_s = mysqli_prepare($conn, $notif_q);
                 mysqli_stmt_bind_param($notif_s, 'i', $student_id);
                 mysqli_stmt_execute($notif_s);
 
-                redirect('/my_applications.php', 'Renewal application submitted successfully! Reference: ' . $app_no, 'success');
+                redirect('/payment.php?pass_id=' . $pass_id, '', 'success');
             } else {
                 $error = 'Failed to submit renewal. Please try again.';
             }
@@ -74,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['renew_pass'])) {
     <title>Renew Pass - <?php echo APP_NAME; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css">
 </head>
 <body>

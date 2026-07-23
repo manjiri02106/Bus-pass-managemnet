@@ -122,13 +122,19 @@ $applications = mysqli_stmt_get_result($s);
                                                     onclick="showDetails(<?php echo htmlspecialchars(json_encode($app)); ?>)">
                                                 <i class="bi bi-eye"></i>
                                             </button>
+                                            <?php if ($app['payment_status'] === 'Pending'): ?>
+                                            <a href="<?php echo BASE_URL; ?>/payment.php?pass_id=<?php echo $app['id']; ?>" 
+                                               class="btn btn-outline-success">
+                                                <i class="bi bi-credit-card"></i> Pay Now
+                                            </a>
+                                            <?php endif; ?>
                                             <?php if ($app['status'] === 'Pending'): ?>
                                             <a href="?cancel=<?php echo $app['id']; ?>" 
                                                class="btn btn-outline-danger cancel-application">
                                                 <i class="bi bi-x-lg"></i>
                                             </a>
                                             <?php endif; ?>
-                                            <?php if ($app['status'] === 'Approved' && strtotime($app['valid_until']) >= time()): ?>
+                                            <?php if ($app['status'] === 'Approved' && $app['payment_status'] === 'Paid' && strtotime($app['valid_until']) >= time()): ?>
                                             <a href="<?php echo BASE_URL; ?>/download_pass.php?id=<?php echo $app['id']; ?>" 
                                                class="btn btn-outline-success">
                                                 <i class="bi bi-download"></i>

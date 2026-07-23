@@ -1,6 +1,6 @@
 <?php
 /**
- * Apply Bus Pass - Multi-step Application Form
+ * Apply Bus Pass - Multi-step Application Form with Payment
  * Bus Pass Management System
  */
 require_once 'config/database.php';
@@ -56,95 +56,97 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
             if (!$route) {
                 $error = 'Invalid route selected.';
             } else {
-                // If it's a custom route, we already know the fare. If it's DB route, we use DB fare.
-                // Wait, if it's custom, the fare was inserted into DB.
                 $fee = calculatePassFee($route['fare'], $pass_type);
                 $validity = calculateValidity($pass_type);
                 $app_no = generateApplicationNo($student_id);
             
-            // Handle file uploads
-            $upload_dir = UPLOAD_PATH;
-            if (!is_dir($upload_dir)) {
-                mkdir($upload_dir, 0777, true);
-            }
-            
-            $college_id_doc = '';
-            $photo_doc = '';
-            $address_proof_doc = '';
-            $upload_ok = true;
-            
-            // Upload College ID
-            if (isset($_FILES['college_id_doc']) && $_FILES['college_id_doc']['error'] === UPLOAD_ERR_OK) {
-                $ext = strtolower(pathinfo($_FILES['college_id_doc']['name'], PATHINFO_EXTENSION));
-                $allowed = ['jpg', 'jpeg', 'png', 'pdf'];
-                if (in_array($ext, $allowed)) {
-                    $college_id_doc = 'college_id_' . $app_no . '.' . $ext;
-                    move_uploaded_file($_FILES['college_id_doc']['tmp_name'], $upload_dir . $college_id_doc);
-                } else {
-                    $error = 'College ID must be JPG, PNG or PDF.';
-                    $upload_ok = false;
+                // Handle file uploads
+                $upload_dir = UPLOAD_PATH;
+                if (!is_dir($upload_dir)) {
+                    mkdir($upload_dir, 0777, true);
                 }
-            } else {
-                $error = 'College ID document is required.';
-                $upload_ok = false;
-            }
-            
-            // Upload Photo
-            if ($upload_ok && isset($_FILES['photo_doc']) && $_FILES['photo_doc']['error'] === UPLOAD_ERR_OK) {
-                $ext = strtolower(pathinfo($_FILES['photo_doc']['name'], PATHINFO_EXTENSION));
-                $allowed = ['jpg', 'jpeg', 'png'];
-                if (in_array($ext, $allowed)) {
-                    $photo_doc = 'photo_' . $app_no . '.' . $ext;
-                    move_uploaded_file($_FILES['photo_doc']['tmp_name'], $upload_dir . $photo_doc);
-                } else {
-                    $error = 'Photo must be JPG or PNG.';
-                    $upload_ok = false;
-                }
-            } else {
-                if ($upload_ok) {
-                    $error = 'Photo is required.';
-                    $upload_ok = false;
-                }
-            }
-            
-            // Upload Address Proof
-            if ($upload_ok && isset($_FILES['address_proof_doc']) && $_FILES['address_proof_doc']['error'] === UPLOAD_ERR_OK) {
-                $ext = strtolower(pathinfo($_FILES['address_proof_doc']['name'], PATHINFO_EXTENSION));
-                $allowed = ['jpg', 'jpeg', 'png', 'pdf'];
-                if (in_array($ext, $allowed)) {
-                    $address_proof_doc = 'address_' . $app_no . '.' . $ext;
-                    move_uploaded_file($_FILES['address_proof_doc']['tmp_name'], $upload_dir . $address_proof_doc);
-                } else {
-                    $error = 'Address proof must be JPG, PNG or PDF.';
-                    $upload_ok = false;
-                }
-            } else {
-                if ($upload_ok) {
-                    $error = 'Address proof is required.';
-                    $upload_ok = false;
-                }
-            }
-            
-            if ($upload_ok) {
-                $query = "INSERT INTO bus_passes (application_no, student_id, route_id, pass_type, college_id_doc, photo_doc, address_proof_doc, fee, valid_from, valid_until) 
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                $stmt = mysqli_prepare($conn, $query);
-                mysqli_stmt_bind_param($stmt, 'siissssdss', $app_no, $student_id, $route_id, $pass_type, $college_id_doc, $photo_doc, $address_proof_doc, $fee, $validity['from'], $validity['until']);
                 
-                if (mysqli_stmt_execute($stmt)) {
-                    // Create notification
-                    $notif_q = "INSERT INTO notifications (student_id, title, message, type) VALUES (?, 'Application Submitted', 'Your bus pass application (Ref: $app_no) has been submitted successfully. Please wait for admin approval.', 'info')";
-                    $notif_s = mysqli_prepare($conn, $notif_q);
-                    mysqli_stmt_bind_param($notif_s, 'i', $student_id);
-                    mysqli_stmt_execute($notif_s);
-                    
-                    redirect('/my_applications.php', 'Application submitted successfully! Your reference number is: ' . $app_no, 'success');
+                $college_id_doc = '';
+                $photo_doc = '';
+                $address_proof_doc = '';
+                $upload_ok = true;
+                
+                // Upload College ID
+                if (isset($_FILES['college_id_doc']) && $_FILES['college_id_doc']['error'] === UPLOAD_ERR_OK) {
+                    $ext = strtolower(pathinfo($_FILES['college_id_doc']['name'], PATHINFO_EXTENSION));
+                    $allowed = ['jpg', 'jpeg', 'png', 'pdf'];
+                    if (in_array($ext, $allowed)) {
+                        $college_id_doc = 'college_id_' . $app_no . '.' . $ext;
+                        move_uploaded_file($_FILES['college_id_doc']['tmp_name'], $upload_dir . $college_id_doc);
+                    } else {
+                        $error = 'College ID must be JPG, PNG or PDF.';
+                        $upload_ok = false;
+                    }
                 } else {
-                    $error = 'Failed to submit application. Please try again.';
+                    $error = 'College ID document is required.';
+                    $upload_ok = false;
+                }
+                
+                // Upload Photo
+                if ($upload_ok && isset($_FILES['photo_doc']) && $_FILES['photo_doc']['error'] === UPLOAD_ERR_OK) {
+                    $ext = strtolower(pathinfo($_FILES['photo_doc']['name'], PATHINFO_EXTENSION));
+                    $allowed = ['jpg', 'jpeg', 'png'];
+                    if (in_array($ext, $allowed)) {
+                        $photo_doc = 'photo_' . $app_no . '.' . $ext;
+                        move_uploaded_file($_FILES['photo_doc']['tmp_name'], $upload_dir . $photo_doc);
+                    } else {
+                        $error = 'Photo must be JPG or PNG.';
+                        $upload_ok = false;
+                    }
+                } else {
+                    if ($upload_ok) {
+                        $error = 'Photo is required.';
+                        $upload_ok = false;
+                    }
+                }
+                
+                // Upload Address Proof
+                if ($upload_ok && isset($_FILES['address_proof_doc']) && $_FILES['address_proof_doc']['error'] === UPLOAD_ERR_OK) {
+                    $ext = strtolower(pathinfo($_FILES['address_proof_doc']['name'], PATHINFO_EXTENSION));
+                    $allowed = ['jpg', 'jpeg', 'png', 'pdf'];
+                    if (in_array($ext, $allowed)) {
+                        $address_proof_doc = 'address_' . $app_no . '.' . $ext;
+                        move_uploaded_file($_FILES['address_proof_doc']['tmp_name'], $upload_dir . $address_proof_doc);
+                    } else {
+                        $error = 'Address proof must be JPG, PNG or PDF.';
+                        $upload_ok = false;
+                    }
+                } else {
+                    if ($upload_ok) {
+                        $error = 'Address proof is required.';
+                        $upload_ok = false;
+                    }
+                }
+                
+                if ($upload_ok) {
+                    // Insert bus pass with payment_status = Pending
+                    $query = "INSERT INTO bus_passes (application_no, student_id, route_id, pass_type, college_id_doc, photo_doc, address_proof_doc, fee, valid_from, valid_until, payment_status) 
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')";
+                    $stmt = mysqli_prepare($conn, $query);
+                    mysqli_stmt_bind_param($stmt, 'siissssdss', $app_no, $student_id, $route_id, $pass_type, $college_id_doc, $photo_doc, $address_proof_doc, $fee, $validity['from'], $validity['until']);
+                    
+                    if (mysqli_stmt_execute($stmt)) {
+                        $pass_id = mysqli_insert_id($conn);
+                        
+                        // Create notification
+                        $notif_q = "INSERT INTO notifications (student_id, title, message, type) VALUES (?, 'Application Submitted', 'Your bus pass application (Ref: $app_no) has been submitted successfully. Please complete the payment.', 'info')";
+                        $notif_s = mysqli_prepare($conn, $notif_q);
+                        mysqli_stmt_bind_param($notif_s, 'i', $student_id);
+                        mysqli_stmt_execute($notif_s);
+                        
+                        // Redirect to payment page
+                        redirect('/payment.php?pass_id=' . $pass_id, '', 'success');
+                    } else {
+                        $error = 'Failed to submit application. Please try again.';
+                    }
                 }
             }
-            }
-        } // End of if (empty($error))
+        }
     }
 }
 ?>
@@ -159,6 +161,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.min.css">
 </head>
 <body>
     <?php include 'includes/navbar.php'; ?>
@@ -190,7 +194,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
                 <div class="step-connector"></div>
                 <div class="step" data-step="3">
                     <div class="step-number">3</div>
-                    <div class="step-label">Review & Submit</div>
+                    <div class="step-label">Review</div>
+                </div>
+                <div class="step-connector"></div>
+                <div class="step" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Payment</div>
                 </div>
             </div>
 
@@ -392,8 +401,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
                                 <button type="button" class="btn btn-outline-secondary" onclick="goToStep(2)">
                                     <i class="bi bi-arrow-left me-1"></i> Previous
                                 </button>
-                                <button type="submit" name="submit_application" class="btn btn-success btn-lg">
-                                    <i class="bi bi-check-lg me-1"></i> Submit Application
+                                <button type="button" class="btn btn-primary btn-lg" onclick="goToStep(4)">
+                                    Continue to Payment <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Confirm & Submit -->
+                        <div class="step-content" id="step4" style="display:none;">
+                            <h5 class="fw-bold mb-3"><i class="bi bi-shield-lock me-2"></i>Confirm & Submit</h5>
+                            
+                            <div class="card bg-light mb-4">
+                                <div class="card-body">
+                                    <h6 class="fw-bold text-center mb-3">Final Review</h6>
+                                    <p class="text-center text-muted mb-3">
+                                        Please review your application one last time before submitting.
+                                        After submission, you will be redirected to complete the payment.
+                                    </p>
+                                    <div class="d-grid">
+                                        <button type="submit" name="submit_application" class="btn btn-success btn-lg">
+                                            <i class="bi bi-check-lg me-1"></i> Submit Application & Proceed to Payment
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-secondary" onclick="goToStep(3)">
+                                    <i class="bi bi-arrow-left me-1"></i> Back to Review
                                 </button>
                             </div>
                         </div>
@@ -406,11 +441,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.3/dist/sweetalert2.all.min.js"></script>
     <script src="<?php echo BASE_URL; ?>/assets/js/script.js"></script>
     <script>
         // Step navigation
         let currentStep = 1;
-        const totalSteps = 3;
+        const totalSteps = 4;
 
         function goToStep(step) {
             // Validate current step before moving forward
