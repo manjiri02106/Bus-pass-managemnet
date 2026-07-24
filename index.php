@@ -70,7 +70,7 @@ try {
         <div class="stat-label">Pass Tiers</div>
     </div>
     <div class="stat-item">
-        <div class="stat-number text-gradient">$<?= number_format(e($stats['revenue']), 2) ?></div>
+        <div class="stat-number text-gradient">$<?= e(number_format((float)$stats['revenue'], 2)) ?></div>
         <div class="stat-label">Processed Payments</div>
     </div>
 </section>
@@ -148,7 +148,7 @@ try {
                                 <td><strong><?= e($route['route_code']) ?></strong></td>
                                 <td><?= e($route['source']) ?></td>
                                 <td><?= e($route['destination']) ?></td>
-                                <td><strong>$<?= number_format(e($route['standard_price']), 2) ?></strong></td>
+                                <td><strong>$<?= e(number_format((float)$route['standard_price'], 2)) ?></strong></td>
                             </tr>
                         <?php
                         endforeach;
