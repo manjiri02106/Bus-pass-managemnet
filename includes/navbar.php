@@ -5,17 +5,31 @@
  */
 require_once __DIR__ . '/../config/auth.php';
 
-$current_user = getCurrentStudent();
-$student_id = $_SESSION['student_id'] ?? 0;
+global $conn;
 
-// Count unread notifications
-$notif_query = "SELECT COUNT(*) as cnt FROM notifications WHERE student_id = ? AND is_read = 0";
-$notif_stmt = mysqli_prepare($conn, $notif_query);
-mysqli_stmt_bind_param($notif_stmt, 'i', $student_id);
-mysqli_stmt_execute($notif_stmt);
-$notif_result = mysqli_stmt_get_result($notif_stmt);
-$notif_data = mysqli_fetch_assoc($notif_result);
-$unread_count = $notif_data['cnt'] ?? 0;
+$current_user = null;
+$student_id = 0;
+$unread_count = 0;
+
+if (isLoggedIn()) {
+    $current_user = getCurrentStudent();
+    $student_id = (int)($_SESSION['student_id'] ?? 0);
+
+    // Count unread notifications
+    if ($student_id > 0) {
+        $notif_query = "SELECT COUNT(*) as cnt FROM notifications WHERE student_id = ? AND is_read = 0";
+        $notif_stmt = mysqli_prepare($conn, $notif_query);
+        if ($notif_stmt) {
+            mysqli_stmt_bind_param($notif_stmt, 'i', $student_id);
+            mysqli_stmt_execute($notif_stmt);
+            $notif_result = mysqli_stmt_get_result($notif_stmt);
+            if ($notif_result) {
+                $notif_data = mysqli_fetch_assoc($notif_result);
+                $unread_count = (int)($notif_data['cnt'] ?? 0);
+            }
+        }
+    }
+}
 ?>
 <!-- Mobile Toggle Button -->
 <button class="sidebar-toggle btn btn-primary d-lg-none" type="button" id="sidebarToggle">
@@ -34,7 +48,7 @@ $unread_count = $notif_data['cnt'] ?? 0;
                 <i class="bi bi-bus-front-fill"></i>
             </div>
             <div class="brand-text">
-                <span class="brand-title">ZCOER</span>
+                <span class="brand-title">PMPML</span>
                 <span class="brand-subtitle">Bus Pass</span>
             </div>
         </div>

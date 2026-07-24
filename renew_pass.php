@@ -7,55 +7,123 @@ require_once 'config/database.php';
 require_once 'config/auth.php';
 requireLogin();
 
+$student = getCurrentStudent();
 $student_id = (int)$_SESSION['student_id'];
 
-// Get active/expired passes eligible for renewal
-$q = "SELECT bp.*, r.route_name, r.source, r.destination, r.fare as route_fare 
-      FROM bus_passes bp 
-      JOIN routes r ON bp.route_id = r.id 
-      WHERE bp.student_id = ? AND bp.status IN ('Approved', 'Expired') 
-      ORDER BY bp.valid_until DESC";
-$s = mysqli_prepare($conn, $q);
-mysqli_stmt_bind_param($s, 'i', $student_id);
-mysqli_stmt_execute($s);
-$passes = mysqli_stmt_get_result($s);
+// Get latest approved Monthly bus pass
+$latest_pass_query = "SELECT bp.*, r.route_name, r.source, r.destination, r.fare as route_fare
+                      FROM bus_passes bp
+                      JOIN routes r ON bp.route_id = r.id
+                      WHERE bp.student_id = ? AND bp.status = 'Approved' AND bp.pass_type = 'Monthly'
+                      ORDER BY bp.valid_until DESC LIMIT 1";
+$latest_pass_stmt = mysqli_prepare($conn, $latest_pass_query);
+mysqli_stmt_bind_param($latest_pass_stmt, 'i', $student_id);
+mysqli_stmt_execute($latest_pass_stmt);
+$latest_pass_result = mysqli_stmt_get_result($latest_pass_stmt);
+$original_pass = mysqli_fetch_assoc($latest_pass_result);
 
-$routes_query = "SELECT MIN(id) as id, route_name, source, destination, fare FROM routes WHERE status = 'Active' GROUP BY route_name ORDER BY route_name";
-$routes_result = mysqli_query($conn, $routes_query);
+if (!$original_pass) {
+    redirect('/dashboard.php', 'You don\'t have an approved Monthly bus pass to renew.', 'warning');
+}
+
+// Check if there's already a pending renewal for this pass
+$pending_query = "SELECT * FROM bus_passes 
+                  WHERE student_id = ? AND status = 'Pending' AND original_pass_id = ?
+                  ORDER BY id DESC LIMIT 1";
+$pending_stmt = mysqli_prepare($conn, $pending_query);
+mysqli_stmt_bind_param($pending_stmt, 'ii', $student_id, $original_pass['id']);
+mysqli_stmt_execute($pending_stmt);
+$pending_result = mysqli_stmt_get_result($pending_stmt);
+$pending_renewal = mysqli_fetch_assoc($pending_result);
+
+if ($pending_renewal) {
+    redirect('/payment.php?pass_id=' . $pending_renewal['id'], 'You already have a pending renewal. Please complete payment.', 'info');
+}
 
 $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['renew_pass'])) {
-    $route_id = (int)$_POST['route_id'];
-    $pass_type = sanitize($_POST['pass_type']);
+    // Use same route as original pass
+    $route_id = $original_pass['route_id'];
+    $pass_type = 'Monthly'; // Fixed to Monthly for renewal as per requirement
+    $original_pass_id = $original_pass['id'];
 
-    if (empty($route_id) || empty($pass_type)) {
-        $error = 'Please select a route and pass type.';
+    // Calculate fee and validity
+    $route_q = "SELECT * FROM routes WHERE id = ?";
+    $route_s = mysqli_prepare($conn, $route_q);
+    mysqli_stmt_bind_param($route_s, 'i', $route_id);
+    mysqli_stmt_execute($route_s);
+    $route = mysqli_fetch_assoc(mysqli_stmt_get_result($route_s));
+
+    if (!$route) {
+        $error = 'Invalid route.';
     } else {
-        $route_q = "SELECT * FROM routes WHERE id = ?";
-        $route_s = mysqli_prepare($conn, $route_q);
-        mysqli_stmt_bind_param($route_s, 'i', $route_id);
-        mysqli_stmt_execute($route_s);
-        $route = mysqli_fetch_assoc(mysqli_stmt_get_result($route_s));
+        $fee = calculatePassFee($route['fare'], $pass_type);
+        $validity = calculateValidity($pass_type);
+        $app_no = generateApplicationNo($student_id);
 
-        if (!$route) {
-            $error = 'Invalid route selected.';
-        } else {
-            $fee = calculatePassFee($route['fare'], $pass_type);
-            $validity = calculateValidity($pass_type);
-            $app_no = generateApplicationNo($student_id);
-            $payment_status = 'Pending';
+        // Handle file uploads - keep existing or replace
+        $upload_dir = UPLOAD_PATH;
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0777, true);
+        }
 
-            $query = "INSERT INTO bus_passes (application_no, student_id, route_id, pass_type, fee, valid_from, valid_until, status, payment_status) 
-                      VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending', ?)";
+        $college_id_doc = $original_pass['college_id_doc'];
+        $photo_doc = $original_pass['photo_doc'];
+        $address_proof_doc = $original_pass['address_proof_doc'];
+        $upload_ok = true;
+
+        // Replace College ID if new file is uploaded
+        if (isset($_FILES['college_id_doc']) && $_FILES['college_id_doc']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['college_id_doc']['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'pdf'];
+            if (in_array($ext, $allowed)) {
+                $college_id_doc = 'college_id_' . $app_no . '.' . $ext;
+                move_uploaded_file($_FILES['college_id_doc']['tmp_name'], $upload_dir . $college_id_doc);
+            } else {
+                $error = 'College ID must be JPG, PNG or PDF.';
+                $upload_ok = false;
+            }
+        }
+
+        // Replace Photo if new file is uploaded
+        if ($upload_ok && isset($_FILES['photo_doc']) && $_FILES['photo_doc']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['photo_doc']['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png'];
+            if (in_array($ext, $allowed)) {
+                $photo_doc = 'photo_' . $app_no . '.' . $ext;
+                move_uploaded_file($_FILES['photo_doc']['tmp_name'], $upload_dir . $photo_doc);
+            } else {
+                $error = 'Photo must be JPG or PNG.';
+                $upload_ok = false;
+            }
+        }
+
+        // Replace Address Proof if new file is uploaded
+        if ($upload_ok && isset($_FILES['address_proof_doc']) && $_FILES['address_proof_doc']['error'] === UPLOAD_ERR_OK) {
+            $ext = strtolower(pathinfo($_FILES['address_proof_doc']['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'pdf'];
+            if (in_array($ext, $allowed)) {
+                $address_proof_doc = 'address_' . $app_no . '.' . $ext;
+                move_uploaded_file($_FILES['address_proof_doc']['tmp_name'], $upload_dir . $address_proof_doc);
+            } else {
+                $error = 'Address proof must be JPG, PNG or PDF.';
+                $upload_ok = false;
+            }
+        }
+
+        if ($upload_ok) {
+            // Insert renewal pass
+            $query = "INSERT INTO bus_passes (application_no, student_id, route_id, original_pass_id, pass_type, college_id_doc, photo_doc, address_proof_doc, fee, valid_from, valid_until, payment_status, status) 
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending', 'Pending')";
             $stmt = mysqli_prepare($conn, $query);
-            mysqli_stmt_bind_param($stmt, 'siisssss', $app_no, $student_id, $route_id, $pass_type, $fee, $validity['from'], $validity['until'], $payment_status);
+            mysqli_stmt_bind_param($stmt, 'siiisssdss', $app_no, $student_id, $route_id, $original_pass_id, $pass_type, $college_id_doc, $photo_doc, $address_proof_doc, $fee, $validity['from'], $validity['until']);
 
             if (mysqli_stmt_execute($stmt)) {
                 $pass_id = mysqli_insert_id($conn);
                 // Notification
-                $notif_q = "INSERT INTO notifications (student_id, title, message, type) VALUES (?, 'Renewal Submitted', 'Your bus pass renewal application (Ref: $app_no) has been submitted successfully. Please complete the payment.', 'info')";
+                $notif_q = "INSERT INTO notifications (student_id, title, message, type) VALUES (?, 'Renewal Request Submitted', 'Your bus pass renewal request (Ref: $app_no) has been submitted successfully. Please complete the payment.', 'info')";
                 $notif_s = mysqli_prepare($conn, $notif_q);
                 mysqli_stmt_bind_param($notif_s, 'i', $student_id);
                 mysqli_stmt_execute($notif_s);
@@ -95,158 +163,156 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['renew_pass'])) {
                 </div>
             <?php endif; ?>
 
-            <!-- Existing Passes -->
-            <?php if (mysqli_num_rows($passes) > 0): ?>
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Your Previous Passes</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>App No.</th>
-                                    <th>Route</th>
-                                    <th>Type</th>
-                                    <th>Validity</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php while ($pass = mysqli_fetch_assoc($passes)): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($pass['application_no']); ?></td>
-                                    <td><?php echo htmlspecialchars($pass['route_name']); ?></td>
-                                    <td><?php echo $pass['pass_type']; ?></td>
-                                    <td><?php echo date('d-m-Y', strtotime($pass['valid_from'])); ?> → <?php echo date('d-m-Y', strtotime($pass['valid_until'])); ?></td>
-                                    <td>
-                                        <span class="badge badge-status <?php echo $pass['status'] === 'Approved' ? 'badge-approved' : 'badge-expired'; ?>">
-                                            <?php echo $pass['status']; ?>
-                                        </span>
-                                    </td>
-                                </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
+            <div class="row g-4">
+                <!-- Original Pass Summary -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0"><i class="bi bi-card-checklist me-2"></i>Original Pass Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-sm">
+                                <tr><td class="text-muted">Application No:</td><td class="fw-bold"><?php echo htmlspecialchars($original_pass['application_no']); ?></td></tr>
+                                <tr><td class="text-muted">Route:</td><td class="fw-bold"><?php echo htmlspecialchars($original_pass['route_name']); ?></td></tr>
+                                <tr><td class="text-muted">Source:</td><td><?php echo htmlspecialchars($original_pass['source']); ?></td></tr>
+                                <tr><td class="text-muted">Destination:</td><td><?php echo htmlspecialchars($original_pass['destination']); ?></td></tr>
+                                <tr><td class="text-muted">Valid From:</td><td><?php echo date('d M Y', strtotime($original_pass['valid_from'])); ?></td></tr>
+                                <tr><td class="text-muted">Valid Until:</td><td><?php echo date('d M Y', strtotime($original_pass['valid_until'])); ?></td></tr>
+                                <tr><td class="text-muted">Original Fee:</td><td>₹<?php echo number_format($original_pass['fee'], 2); ?></td></tr>
+                            </table>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <?php else: ?>
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle me-2"></i>No previous passes found. You can apply for a new pass.
-            </div>
-            <?php endif; ?>
 
-            <!-- Renewal Form -->
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="bi bi-file-earmark-plus me-2"></i>Apply for Renewal</h5>
-                </div>
-                <div class="card-body p-4">
-                    <form method="POST" action="" class="needs-validation" novalidate>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Bus Route <span class="text-danger">*</span></label>
-                                <select name="route_id" id="route_id" class="form-select" required>
-                                    <option value="">-- Select Route --</option>
-                                    <?php mysqli_data_seek($routes_result, 0); while ($route = mysqli_fetch_assoc($routes_result)): ?>
-                                    <option value="<?php echo $route['id']; ?>" data-fare="<?php echo $route['fare']; ?>">
-                                        <?php echo htmlspecialchars($route['route_name']); ?> - ₹<?php echo number_format($route['fare'], 2); ?>
-                                    </option>
-                                    <?php endwhile; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Pass Type <span class="text-danger">*</span></label>
-                                <select name="pass_type" id="pass_type" class="form-select" required>
-                                    <option value="">-- Select --</option>
-                                    <option value="Daily">Daily</option>
-                                    <option value="Monthly">Monthly</option>
-                                    <option value="Quarterly">Quarterly</option>
-                                    <option value="Half Yearly">Half Yearly</option>
-                                    <option value="Yearly">Yearly</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Calculated Fee</label>
-                                <input type="text" class="form-control" id="calculated_fee" readonly value="Select options">
-                            </div>
+                <!-- Renewal Form -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0"><i class="bi bi-file-earmark-plus me-2"></i>Renewal Form</h5>
                         </div>
-                        <div id="fee_display" class="mt-3"></div>
-                        <button type="submit" name="renew_pass" class="btn btn-primary mt-3">
-                            <i class="bi bi-arrow-repeat me-1"></i>Submit Renewal
-                        </button>
-                    </form>
+                        <div class="card-body p-4">
+                            <form method="POST" action="" enctype="multipart/form-data" id="renewPassForm">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Student Name</label>
+                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($student['full_name']); ?>" disabled>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">PRN / College ID</label>
+                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($student['college_id_number']); ?>" disabled>
+                                    </div>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label">Pass Type</label>
+                                        <input type="text" class="form-control" value="Monthly" disabled>
+                                        <input type="hidden" name="pass_type" value="Monthly">
+                                    </div>
+                                    <div class="col-md-8">
+                                        <label class="form-label">Bus Route (Fixed)</label>
+                                        <input type="text" class="form-control" value="<?php echo htmlspecialchars($original_pass['route_name']); ?>" disabled>
+                                        <input type="hidden" name="route_id" value="<?php echo $original_pass['route_id']; ?>">
+                                    </div>
+                                </div>
+
+                                <!-- Renewal Price Summary -->
+                                <div class="card border-primary mb-3">
+                                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-2">
+                                        <span><i class="bi bi-receipt me-2"></i><strong>Renewal Price Summary</strong></span>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <?php
+                                        $renewal_fee = calculatePassFee($original_pass['route_fare'], 'Monthly');
+                                        $today = new DateTime();
+                                        $valid_until = new DateTime();
+                                        $valid_until->add(new DateInterval('P1M'));
+                                        ?>
+                                        <p class="mb-1">Daily Fare: <strong>₹<?php echo number_format($original_pass['route_fare'], 2); ?></strong></p>
+                                        <p class="mb-1">Calculation: ₹<?php echo $original_pass['route_fare']; ?> × 30 days × 95% (5% off)</p>
+                                        <p class="fs-4 fw-bold text-success mb-0">Total Amount to Pay: ₹<?php echo number_format($renewal_fee, 2); ?></p>
+                                        <p class="text-muted small mt-2">Validity: <?php echo $today->format('d M Y'); ?> → <?php echo $valid_until->format('d M Y'); ?></p>
+                                    </div>
+                                </div>
+
+                                <!-- Document Upload (Replace Option) -->
+                                <h6 class="fw-bold mt-4 mb-3"><i class="bi bi-upload me-2"></i>Documents (Replace if needed)</h6>
+                                <p class="text-muted small mb-3">Your existing documents are already attached. You may replace them if required.</p>
+                                
+                                <div class="row g-4">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">College ID Card</label>
+                                        <div class="upload-area" onclick="document.getElementById('college_id_doc').click()">
+                                            <div class="upload-icon"><i class="bi bi-card-text"></i></div>
+                                            <p class="mb-1">Click to replace College ID</p>
+                                            <span class="file-name text-muted small">Existing file: <?php echo htmlspecialchars(basename($original_pass['college_id_doc'])); ?></span>
+                                            <img id="preview_college_id" class="img-fluid mt-2 rounded" style="max-height:120px;display:none;">
+                                        </div>
+                                        <input type="file" name="college_id_doc" id="college_id_doc" class="d-none" 
+                                               accept=".jpg,.jpeg,.png,.pdf" data-preview="preview_college_id">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Passport Photo</label>
+                                        <div class="upload-area" onclick="document.getElementById('photo_doc').click()">
+                                            <div class="upload-icon"><i class="bi bi-person-badge"></i></div>
+                                            <p class="mb-1">Click to replace Photo</p>
+                                            <span class="file-name text-muted small">Existing file: <?php echo htmlspecialchars(basename($original_pass['photo_doc'])); ?></span>
+                                            <img id="preview_photo" class="img-fluid mt-2 rounded" style="max-height:120px;display:none;">
+                                        </div>
+                                        <input type="file" name="photo_doc" id="photo_doc" class="d-none" 
+                                               accept=".jpg,.jpeg,.png" data-preview="preview_photo">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">Address Proof</label>
+                                        <div class="upload-area" onclick="document.getElementById('address_proof_doc').click()">
+                                            <div class="upload-icon"><i class="bi bi-house-door"></i></div>
+                                            <p class="mb-1">Click to replace Address Proof</p>
+                                            <span class="file-name text-muted small">Existing file: <?php echo htmlspecialchars(basename($original_pass['address_proof_doc'])); ?></span>
+                                            <img id="preview_address" class="img-fluid mt-2 rounded" style="max-height:120px;display:none;">
+                                        </div>
+                                        <input type="file" name="address_proof_doc" id="address_proof_doc" class="d-none" 
+                                               accept=".jpg,.jpeg,.png,.pdf" data-preview="preview_address">
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 d-grid gap-2">
+                                    <button type="submit" name="renew_pass" class="btn btn-success btn-lg">
+                                        <i class="bi bi-arrow-repeat me-1"></i> Proceed to Payment
+                                    </button>
+                                    <a href="<?php echo BASE_URL; ?>/dashboard.php" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <?php include 'includes/footer.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Pass type styles for visual distinction
-        const passTypeStyles = {
-            'Daily': { icon: 'bi-calendar-day', color: '#0ea5e9', bg: '#f0f9ff' },
-            'Monthly': { icon: 'bi-calendar-month', color: '#22c55e', bg: '#f0fdf4' },
-            'Quarterly': { icon: 'bi-calendar3', color: '#f97316', bg: '#fff7ed' },
-            'Half Yearly': { icon: 'bi-calendar-week', color: '#a855f7', bg: '#fdf4ff' },
-            'Yearly': { icon: 'bi-calendar-check', color: '#ef4444', bg: '#fef2f2' },
-        };
-
-        // Calculate fee based on selected route and pass type
-        document.getElementById('route_id').addEventListener('change', calculateFee);
-        document.getElementById('pass_type').addEventListener('change', calculateFee);
-
-        function calculateFee() {
-            const routeSelect = document.getElementById('route_id');
-            const passType = document.getElementById('pass_type').value;
-            const feeInput = document.getElementById('calculated_fee');
-            const feeDisplay = document.getElementById('fee_display');
-
-            if (!routeSelect.value || !passType) {
-                feeInput.value = 'Select options';
-                feeDisplay.innerHTML = '';
-                return;
-            }
-
-            const selectedOption = routeSelect.options[routeSelect.selectedIndex];
-            const routeFare = parseFloat(selectedOption.dataset.fare);
-
-            const multipliers = {
-                'Daily': 1,
-                'Monthly': 30,
-                'Quarterly': 90,
-                'Half Yearly': 180,
-                'Yearly': 365
-            };
-            const discounts = {
-                'Daily': 1.0,
-                'Monthly': 0.95,
-                'Quarterly': 1.0,
-                'Half Yearly': 1.0,
-                'Yearly': 1.0
-            };
-
-            const baseTotal = routeFare * (multipliers[passType] || 30);
-            const totalFee = baseTotal * (discounts[passType] || 1.0);
-            feeInput.value = '₹' + totalFee.toLocaleString('en-IN', { minimumFractionDigits: 2 });
-
-            // Show breakdown with visual style
-            const style = passTypeStyles[passType];
-            const discountNote = discounts[passType] < 1.0 ? '<span class="badge bg-warning text-dark ms-1">5% OFF</span>' : '';
-            const calculationText = discounts[passType] < 1.0 
-                ? `₹${routeFare.toFixed(2)} × ${multipliers[passType]} × ${(discounts[passType]*100).toFixed(0)}%` 
-                : `₹${routeFare.toFixed(2)} × ${multipliers[passType]}`;
-            
-            feeDisplay.innerHTML = `
-                <div class="alert mt-2 p-3" style="background-color: ${style.bg}; border-left: 4px solid ${style.color};">
-                    <i class="bi ${style.icon} me-2" style="color: ${style.color}; font-size: 1.2rem;"></i>
-                    Calculation: ${calculationText} = <strong>₹${totalFee.toLocaleString('en-IN', { minimumFractionDigits: 2})}</strong>
-                    ${discountNote}
-                </div>
-            `;
-        }
+        // File preview
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const previewId = this.dataset.preview;
+                const previewImg = document.getElementById(previewId);
+                if (this.files && this.files[0]) {
+                    if (previewImg && this.files[0].type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = e => {
+                            previewImg.src = e.target.result;
+                            previewImg.style.display = 'block';
+                        };
+                        reader.readAsDataURL(this.files[0]);
+                    }
+                    // Update file name
+                    const uploadArea = this.closest('.col-md-4').querySelector('.file-name');
+                    uploadArea.textContent = 'New file: ' + this.files[0].name;
+                }
+            });
+        });
     </script>
 </body>
 </html>

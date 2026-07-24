@@ -21,7 +21,7 @@ mysqli_stmt_execute($s);
 $r = mysqli_stmt_get_result($s);
 $stats['total'] = mysqli_fetch_assoc($r)['cnt'];
 
-// Pending applications
+// Pending applications (including renewal)
 $q = "SELECT COUNT(*) as cnt FROM bus_passes WHERE student_id = ? AND status = 'Pending'";
 $s = mysqli_prepare($conn, $q);
 mysqli_stmt_bind_param($s, 'i', $student_id);
@@ -45,13 +45,58 @@ mysqli_stmt_execute($s);
 $r = mysqli_stmt_get_result($s);
 $stats['rejected'] = mysqli_fetch_assoc($r)['cnt'];
 
-// Active pass (approved and valid)
-$q = "SELECT * FROM bus_passes WHERE student_id = ? AND status = 'Approved' AND valid_from <= CURDATE() AND valid_until >= CURDATE() ORDER BY id DESC LIMIT 1";
+// Active pass (approved and valid) - latest approved monthly
+$q = "SELECT * FROM bus_passes WHERE student_id = ? AND status = 'Approved' AND pass_type = 'Monthly' ORDER BY id DESC LIMIT 1";
 $s = mysqli_prepare($conn, $q);
 mysqli_stmt_bind_param($s, 'i', $student_id);
 mysqli_stmt_execute($s);
 $r = mysqli_stmt_get_result($s);
 $active_pass = mysqli_fetch_assoc($r);
+
+$renewal_enabled = false;
+$pending_renewal = false;
+$days_remaining = 0;
+$expiry_banner = false;
+
+if ($active_pass) {
+    // Calculate days remaining
+    $valid_until = new DateTime($active_pass['valid_until']);
+    $today = new DateTime();
+    $days_remaining = $today->diff($valid_until)->days;
+    if ($valid_until < $today) {
+        $days_remaining = -$days_remaining;
+    }
+
+    // Check if there's a pending renewal already
+    $q_pending = "SELECT * FROM bus_passes WHERE student_id = ? AND status = 'Pending' AND (original_pass_id = ? OR route_id = ?) ORDER BY id DESC LIMIT 1";
+    $s_pending = mysqli_prepare($conn, $q_pending);
+    $s_pending_params = [$student_id, $active_pass['id'], $active_pass['route_id']];
+    mysqli_stmt_bind_param($s_pending, 'iii', ...$s_pending_params);
+    mysqli_stmt_execute($s_pending);
+    $pending_renewal = mysqli_fetch_assoc(mysqli_stmt_get_result($s_pending));
+
+    // Check if renewal is allowed (only if no pending renewal and pass is approved monthly)
+    $renewal_enabled = !$pending_renewal;
+
+    // Check if we need to show expiry banner (<=7 days remaining)
+    if ($days_remaining <=7 && $days_remaining >0) {
+        $expiry_banner = true;
+        // Check if we've already sent a notification today for this
+        $q_notif = "SELECT * FROM notifications WHERE student_id = ? AND title LIKE '%expire in%' AND DATE(created_at) = CURDATE()";
+        $s_notif = mysqli_prepare($conn, $q_notif);
+        mysqli_stmt_bind_param($s_notif, 'i', $student_id);
+        mysqli_stmt_execute($s_notif);
+        $existing_notif = mysqli_fetch_assoc(mysqli_stmt_get_result($s_notif));
+        if (!$existing_notif) {
+            // Insert reminder notification
+            $notif_msg = "Your Monthly Bus Pass will expire in {$days_remaining} days. Renew now to avoid interruption.";
+            $insert_q = "INSERT INTO notifications (student_id, title, message, type, is_read) VALUES (?, 'Pass Expiry Reminder', ?, 'warning', 0)";
+            $insert_s = mysqli_prepare($conn, $insert_q);
+            mysqli_stmt_bind_param($insert_s, 'is', $student_id, $notif_msg);
+            mysqli_stmt_execute($insert_s);
+        }
+    }
+}
 
 // Recent notifications (last 5)
 $q = "SELECT * FROM notifications WHERE student_id = ? ORDER BY created_at DESC LIMIT 5";
@@ -85,6 +130,18 @@ $unread_count = mysqli_fetch_assoc($r)['cnt'];
     
     <div class="container-fluid px-4">
         <?php displayFlashMessage(); ?>
+
+        <!-- Expiry Banner -->
+        <?php if ($expiry_banner && $active_pass): ?>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Pass Expiring Soon!</strong> Your Monthly Bus Pass will expire in <?php echo $days_remaining; ?> days. Renew now to avoid interruption!
+            <a href="<?php echo BASE_URL; ?>/renew_pass.php" class="btn btn-sm btn-warning ms-3">
+                <i class="bi bi-arrow-repeat me-1"></i>Renew Now
+            </a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php endif; ?>
 
         <!-- Welcome Banner -->
         <div class="welcome-banner fade-in">
@@ -157,7 +214,7 @@ $unread_count = mysqli_fetch_assoc($r)['cnt'];
             <div class="col-lg-5">
                 <div class="card shadow-sm h-100">
                     <div class="card-header bg-white">
-                        <h5 class="mb-0"><i class="bi bi-bus-front text-primary me-2"></i>Active Bus Pass</h5>
+                        <h5 class="mb-0"><i class="bi bi-bus-front text-primary me-2"></i>Current Bus Pass</h5>
                     </div>
                     <div class="card-body">
                         <?php if ($active_pass): ?>
@@ -172,7 +229,9 @@ $unread_count = mysqli_fetch_assoc($r)['cnt'];
                                 <div class="watermark"><i class="bi bi-bus-front"></i></div>
                                 <div class="pass-header d-flex justify-content-between align-items-center">
                                     <h5 class="text-primary fw-bold mb-0"><?php echo htmlspecialchars($route['route_name']); ?></h5>
-                                    <span class="badge bg-success badge-status">Active</span>
+                                    <span class="badge bg-<?php echo $days_remaining >0 ? 'success' : 'danger'; ?> badge-status">
+                                        <?php echo $days_remaining >0 ? 'Active' : 'Expired'; ?>
+                                    </span>
                                 </div>
                                 <div class="row mt-3">
                                     <div class="col-6">
@@ -184,22 +243,39 @@ $unread_count = mysqli_fetch_assoc($r)['cnt'];
                                         <p class="fw-bold mb-0"><?php echo date('d M Y', strtotime($active_pass['valid_until'])); ?></p>
                                     </div>
                                 </div>
-                                <div class="mt-3">
-                                    <small class="text-muted">Pass Type: <span class="fw-bold text-dark"><?php echo $active_pass['pass_type']; ?></span></small>
+                                <div class="row mt-2">
+                                    <div class="col-12">
+                                        <small class="text-muted">Days Remaining: </small>
+                                        <span class="fw-bold text-<?php echo $days_remaining <=7 ? 'warning' : 'success'; ?>">
+                                            <?php echo $days_remaining >0 ? $days_remaining : '0'; ?>
+                                        </span>
+                                    </div>
+                                    <div class="col-12 mt-1">
+                                        <small class="text-muted">Pass Type: <span class="fw-bold text-dark"><?php echo $active_pass['pass_type']; ?></span></small>
+                                    </div>
+                                    <div class="col-12 mt-1">
+                                        <small class="text-muted">Payment Status: <span class="fw-bold text-success"><?php echo $active_pass['payment_status']; ?></span></small>
+                                    </div>
                                 </div>
-                                <div class="mt-3 d-flex gap-2">
+                                <div class="mt-3 d-flex gap-2 flex-wrap">
                                     <a href="<?php echo BASE_URL; ?>/download_pass.php?id=<?php echo $active_pass['id']; ?>" class="btn btn-primary btn-sm">
                                         <i class="bi bi-download me-1"></i>Download
                                     </a>
-                                    <a href="<?php echo BASE_URL; ?>/renew_pass.php" class="btn btn-outline-primary btn-sm">
-                                        <i class="bi bi-arrow-repeat me-1"></i>Renew
-                                    </a>
+                                    <?php if ($renewal_enabled): ?>
+                                        <a href="<?php echo BASE_URL; ?>/renew_pass.php" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-arrow-repeat me-1"></i>Renew
+                                        </a>
+                                    <?php elseif ($pending_renewal): ?>
+                                        <button class="btn btn-outline-secondary btn-sm" disabled>
+                                            <i class="bi bi-clock me-1"></i>Renewal Pending
+                                        </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php else: ?>
                             <div class="text-center py-4">
                                 <i class="bi bi-bus-front display-4 text-muted"></i>
-                                <p class="mt-3 text-muted">No active bus pass found.</p>
+                                <p class="mt-3 text-muted">No approved Monthly bus pass found.</p>
                                 <a href="<?php echo BASE_URL; ?>/apply_pass.php" class="btn btn-primary">
                                     <i class="bi bi-file-earmark-plus me-1"></i>Apply Now
                                 </a>

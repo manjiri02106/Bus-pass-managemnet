@@ -86,79 +86,116 @@ if ($pass['payment_status'] === 'Paid') {
                     </div>
                 </div>
 
-                <!-- Payment Methods -->
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white">
-                            <h5 class="mb-0"><i class="bi bi-wallet2 me-2"></i>Payment Method</h5>
-                        </div>
-                        <div class="card-body">
-                            <form method="POST" action="process_payment.php">
-                                <input type="hidden" name="pass_id" value="<?php echo $pass_id; ?>">
-                                
-                                <div class="mb-4">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="credit_card" value="Credit Card" checked>
-                                        <label class="form-check-label" for="credit_card">
-                                            <i class="bi bi-credit-card-2-front me-2"></i> Credit / Debit Card
-                                        </label>
-                                    </div>
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="upi" value="UPI">
-                                        <label class="form-check-label" for="upi">
-                                            <i class="bi bi-phone me-2"></i> UPI
-                                        </label>
-                                    </div>
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="netbanking" value="Net Banking">
-                                        <label class="form-check-label" for="netbanking">
-                                            <i class="bi bi-bank me-2"></i> Net Banking
-                                        </label>
-                                    </div>
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input" type="radio" name="payment_method" id="wallet" value="Wallet">
-                                        <label class="form-check-label" for="wallet">
-                                            <i class="bi bi-wallet me-2"></i> Digital Wallet
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- Simulated Card Details (for demo) -->
-                                <div id="card_details" class="mb-4">
-                                    <div class="row mb-3">
-                                        <div class="col-md-12">
-                                            <label class="form-label">Card Number</label>
-                                            <input type="text" class="form-control" placeholder="1234 5678 9010 1112" maxlength="19">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Expiry Date</label>
-                                            <input type="text" class="form-control" placeholder="MM/YY" maxlength="5">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">CVV</label>
-                                            <input type="password" class="form-control" placeholder="123" maxlength="3">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-success btn-lg">
-                                        <i class="bi bi-lock me-2"></i> Pay ₹<?php echo number_format($pass['fee'], 2); ?>
-                                    </button>
-                                    <a href="my_applications.php" class="btn btn-outline-secondary">
-                                        <i class="bi bi-arrow-left me-2"></i> Pay Later
+                <!-- UPI QR Payment -->
+                        <div class="col-md-6 mb-4">
+                            <div class="card shadow-sm">
+                                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0"><i class="bi bi-qr-code-scan me-2"></i>UPI Payment</h5>
+                                    <?php 
+                                    // Build UPI URI with all required parameters as per user's example
+                                    $merchant_name = "Student Bus Pass";
+                                    $transaction_note = "BusPassApplication_" . $pass['application_no'];
+                                    $amount_formatted = number_format($pass['fee'], 2, '.', ''); // Ensure 2 decimal places, no commas
+                                    $upi_uri = "upi://pay?pa=9960024125@fam&pn=" . urlencode($merchant_name) . "&am=" . $amount_formatted . "&cu=INR&tn=" . urlencode($transaction_note);
+                                    ?>
+                                    <a href="https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=<?php echo urlencode($upi_uri); ?>" 
+                                       class="btn btn-sm btn-outline-primary" download="BusPass_QR_<?php echo $pass['application_no']; ?>.png">
+                                        <i class="bi bi-download me-1"></i>Download High-Res QR
                                     </a>
                                 </div>
-                            </form>
+                                <div class="card-body text-center">
+                                    <p class="text-muted mb-3">Scan the QR code below with any UPI app (Google Pay, PhonePe, Paytm, BHIM, WhatsApp Pay) – amount will auto-fill!</p>
+                                    
+                                    <!-- Original default size (200x200) UPI QR Code -->
+                                    <div class="mb-4">
+                                        <img id="upi-qr" 
+                                             src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=<?php echo urlencode($upi_uri); ?>" 
+                                             alt="UPI QR Code for ₹<?php echo number_format($pass['fee'], 2); ?>" 
+                                             class="img-thumbnail"
+                                             style="max-width: 100%; height: auto;"
+                                             onerror="handleQrError()">
+                                    </div>
+                                    
+                                    <!-- Locked Total Amount & UPI Details -->
+                                    <div class="mb-4 p-3 bg-light rounded">
+                                        <p class="mb-2"><strong>UPI ID:</strong> <span class="text-primary">9960024125@fam</span></p>
+                                        <div class="mb-2">
+                                            <label class="form-label fw-bold">Total Amount (Locked & Auto-Filled)</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">₹</span>
+                                                <input type="text" class="form-control text-center fs-4 fw-bold" 
+                                                       value="<?php echo number_format($pass['fee'], 2); ?>" 
+                                                       readonly style="background-color: #e9ecef;">
+                                            </div>
+                                        </div>
+                                        <p class="mb-0 text-muted small"><i class="bi bi-info-circle me-1"></i>Amount cannot be modified; all major UPI apps will auto-fill it</p>
+                                        <p class="mb-0 mt-2"><strong>Reference:</strong> <?php echo htmlspecialchars($transaction_note); ?></p>
+                                    </div>
+                                    
+                                    <!-- Fallback for apps that don't support pre-filled amount -->
+                                    <div class="alert alert-warning d-none" id="qr-fallback">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        <strong>Note:</strong> If your UPI app doesn't pre-fill the amount, please manually enter <strong>₹<?php echo number_format($pass['fee'], 2); ?></strong>
+                                    </div>
+                                    
+                                    <!-- Payment Form -->
+                                    <form method="POST" action="process_payment.php" id="payment-form">
+                                        <input type="hidden" name="pass_id" value="<?php echo $pass_id; ?>">
+                                        <input type="hidden" name="payment_method" value="UPI">
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label"><i class="bi bi-receipt me-1"></i>Enter Transaction ID (after payment)</label>
+                                            <input type="text" name="transaction_id" id="transactionId" class="form-control" required placeholder="Enter 12+ digit transaction ID" autocomplete="off" minlength="12">
+                                            <div class="invalid-feedback" id="transactionIdError">Transaction ID must be at least 12 characters long.</div>
+                                        </div>
+                                        
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" id="submitBtn" class="btn btn-success btn-lg">
+                                                <i class="bi bi-check-circle me-2"></i>I've Paid, Verify
+                                            </button>
+                                            <a href="my_applications.php" class="btn btn-outline-secondary">
+                                                <i class="bi bi-arrow-left me-2"></i>Pay Later
+                                            </a>
+                                        </div>
+                                    </form>
+                                    
+                                    <script>
+                                        const form = document.getElementById('payment-form');
+                                        const transactionIdInput = document.getElementById('transactionId');
+                                        const transactionIdError = document.getElementById('transactionIdError');
+                                        const submitBtn = document.getElementById('submitBtn');
+                                        
+                                        form.addEventListener('submit', function(e) {
+                                            if (transactionIdInput.value.trim().length < 12) {
+                                                e.preventDefault();
+                                                transactionIdInput.classList.add('is-invalid');
+                                                transactionIdError.style.display = 'block';
+                                            } else {
+                                                transactionIdInput.classList.remove('is-invalid');
+                                                transactionIdError.style.display = 'none';
+                                            }
+                                        });
+                                        
+                                        transactionIdInput.addEventListener('input', function() {
+                                            if (transactionIdInput.value.trim().length >= 12) {
+                                                transactionIdInput.classList.remove('is-invalid');
+                                                transactionIdError.style.display = 'none';
+                                            }
+                                        });
+                                    </script>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 
     <?php include 'includes/footer.php'; ?>
+    <script>
+        function handleQrError() {
+            document.getElementById('qr-fallback').classList.remove('d-none');
+            document.getElementById('upi-qr').style.display = 'none';
+        }
+    </script>
 </body>
 </html>

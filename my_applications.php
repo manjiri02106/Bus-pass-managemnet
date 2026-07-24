@@ -134,6 +134,12 @@ $applications = mysqli_stmt_get_result($s);
                                                 <i class="bi bi-x-lg"></i>
                                             </a>
                                             <?php endif; ?>
+                                            <?php if ($app['payment_status'] === 'Paid'): ?>
+                                            <a href="<?php echo BASE_URL; ?>/generate_receipt.php?pass_id=<?php echo $app['id']; ?>" 
+                                               class="btn btn-outline-secondary">
+                                                <i class="bi bi-receipt"></i>
+                                            </a>
+                                            <?php endif; ?>
                                             <?php if ($app['status'] === 'Approved' && $app['payment_status'] === 'Paid' && strtotime($app['valid_until']) >= time()): ?>
                                             <a href="<?php echo BASE_URL; ?>/download_pass.php?id=<?php echo $app['id']; ?>" 
                                                class="btn btn-outline-success">

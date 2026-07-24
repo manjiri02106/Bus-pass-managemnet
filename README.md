@@ -5,15 +5,18 @@ A production-ready, full-featured Bus Pass Management System designed for educat
 ## ✨ Features
 
 ### Student Features
-- **📝 Multi-Step Application** — Intuitive 3-step wizard for applying bus passes
-- **🗺️ Smart Route Selection** — Search stops with autocomplete, auto-matching routes, and live PMPML GTFS bus schedules
-- **💰 Dynamic Fare Calculation** — Real-time fare calculation based on distance with discounts for longer durations
+- **📝 Multi-Step Application** — Intuitive 4-step wizard (Select Route → Upload Documents → Review → Payment) for applying bus passes
+- **🗺️ Smart Route Selection** — Search stops with autocomplete, auto-matching routes from PMPML CSV, and live PMPML GTFS bus schedules
+- **💰 Dynamic Fare Calculation** — Real-time fare calculation based on distance via PMPML Fare Chart CSV, with discounts for longer durations (5%–20% off)
+- **💳 UPI QR Code Payment** — Integrated UPI payment with auto-generated QR codes for Google Pay, PhonePe, Paytm, BHIM, and WhatsApp Pay
+- **🧾 Digital Receipt Generation** — Download printable PDF receipts via jsPDF with auto-table formatting
+- **🎉 Payment Success Page** — Animated confetti celebration, loading spinner, and auto-redirect to dashboard
 - **📄 Document Upload** — Upload College ID, Photo, and Address Proof during application
 - **📊 Application Tracking** — View all applications with detailed status (Pending/Approved/Rejected/Cancelled/Expired)
-- **🔄 Pass Renewal** — Easily renew expired or expiring bus passes
-- **📥 Digital Pass Download** — Download and print your approved bus pass
-- **💳 Payment Status** — Track payment history and status
-- **🔔 Notifications** — Real-time notifications for application updates
+- **🔄 Pass Renewal** — Easily renew expired or expiring bus passes (Monthly fixed)
+- **📥 Digital Pass Download** — Download and print your approved bus pass with QR code
+- **💳 Payment Status** — Track payment history and status with DataTables
+- **🔔 Notifications** — Real-time notifications for application updates (info, success, warning, danger types)
 - **👤 Profile Management** — View and edit personal information, upload profile picture
 - **🔐 Password Recovery** — Forgot password with secure token-based reset
 
@@ -32,8 +35,9 @@ A production-ready, full-featured Bus Pass Management System designed for educat
 | **Database** | MySQL 8.x |
 | **Frontend** | HTML5, CSS3, Bootstrap 5 |
 | **JavaScript** | jQuery, DataTables, SweetAlert2, Select2 |
+| **PDF Generation** | jsPDF with autoTable plugin |
 | **Icons** | Bootstrap Icons |
-| **Transit Data** | PMPML GTFS (real-time bus schedules) |
+| **Transit Data** | PMPML GTFS (real-time bus schedules), PMPML Fare Chart CSV, KML stop/depot maps |
 
 ## 📋 Prerequisites
 
@@ -104,43 +108,60 @@ http://localhost/Bus-pass-managemnet/
 Bus-pass-managemnet/
 ├── assets/
 │   ├── css/
-│   │   └── style.css          # Custom styles
+│   │   ├── style.css              # Custom styles
+│   │   └── success.css            # Payment success page styles
 │   └── js/
-│       └── script.js          # Custom JavaScript
+│       ├── script.js              # Custom JavaScript
+│       └── success.js             # Payment success JS (confetti, receipts)
 ├── config/
-│   ├── auth.php               # Authentication functions
-│   └── database.php           # Database connection & helpers
+│   ├── auth.php                   # Authentication functions
+│   └── database.php               # Database connection & helpers
 ├── database/
-│   └── bus_pass_db.sql        # Database schema
+│   └── bus_pass_db.sql            # Database schema
 ├── data/
-│   ├── stops.json             # Bus stops data
-│   ├── PMPML_Fare_Chart.csv   # Fare calculation data
-│   └── pmpml-routes-list.csv  # PMPML routes
+│   ├── stops.json                 # Bus stops data
+│   ├── PMPML_Fare_Chart.csv       # Fare calculation data
+│   ├── PMPML 11-Stage Fare Chart Stage Dis.txt  # Alternative fare reference
+│   ├── pmpml-routes-list.csv      # PMPML routes
+│   ├── pmpml-stops-map.kml        # PMPML stops KML data
+│   └── pmpml-depots-map.kml       # PMPML depots KML data
 ├── includes/
-│   ├── header.php             # HTML head section
-│   ├── navbar.php             # Sidebar navigation
-│   └── footer.php             # Footer with scripts
+│   ├── header.php                 # HTML head section
+│   ├── navbar.php                 # Sidebar navigation
+│   └── footer.php                 # Footer with scripts
 ├── ajax/
-│   ├── calculate_fare.php     # AJAX fare calculation
-│   └── get_live_bus.php       # Live bus schedule API
-├── uploads/                   # Document uploads
-├── pmpml-gtfs/                # PMPML GTFS data tools
+│   ├── calculate_fare.php         # AJAX fare & route matching
+│   ├── get_live_bus.php           # Live bus schedule API from PMPML
+│   └── mark_notification_read.php # Mark notification as read
+├── uploads/                       # Document uploads
+├── pmpml-gtfs/                    # PMPML GTFS data tools
 │
-├── index.php                  # Entry point (redirect)
-├── login.php                  # Student login
-├── register.php               # Student registration
-├── dashboard.php              # Student dashboard
-├── apply_pass.php             # Apply for bus pass
-├── my_applications.php        # View all applications
-├── renew_pass.php             # Renew existing pass
-├── download_pass.php          # Download digital pass
-├── payment_status.php         # Payment history
-├── notifications.php          # View notifications
-├── profile.php                # View/Edit profile
-├── change_password.php        # Change password
-├── forgot_password.php        # Password recovery
-├── reset_password.php         # Complete password reset
-├── logout.php                 # Logout handler
+├── index.php                      # Entry point (redirect)
+├── login.php                      # Student login
+├── register.php                   # Student registration
+├── dashboard.php                  # Student dashboard
+├── apply_pass.php                 # Apply for bus pass (4-step wizard)
+├── my_applications.php            # View all applications
+├── renew_pass.php                 # Renew existing pass
+├── download_pass.php              # Download digital pass
+├── payment.php                    # UPI QR code payment page
+├── process_payment.php            # Payment processing handler
+├── payment_success.php            # Payment success page (confetti animation)
+├── payment_status.php             # Payment history & status
+├── generate_receipt.php           # Download PDF receipt
+├── notifications.php              # View notifications
+├── profile.php                    # View/Edit profile
+├── change_password.php            # Change password
+├── forgot_password.php            # Password recovery
+├── reset_password.php             # Complete password reset
+├── logout.php                     # Logout handler
+├── generate_json.php              # Generate stops.json from KML
+├── process_pmpml_data.php         # Bulk import PMPML routes/stops
+├── check_routes_table.php         # Debug: check database routes
+├── debug_routes.php               # Debug: route matching tool
+├── update_database.php            # Database schema updater
+├── test_matching.php              # Test route matching logic
+├── test_pass_fees.php             # Test fee calculation logic
 │
 └── README.md
 ```
@@ -250,6 +271,8 @@ This project is open source and available under the [MIT License](LICENSE).
 - [DataTables](https://datatables.net/) - jQuery table plugin
 - [SweetAlert2](https://sweetalert2.github.io/) - Beautiful alert dialogs
 - [Select2](https://select2.org/) - Enhanced select boxes
+- [jsPDF](https://github.com/parallax/jsPDF) - PDF receipt generation
+- [QRServer API](https://goqr.me/api/) - UPI QR code generation
 
 ---
 

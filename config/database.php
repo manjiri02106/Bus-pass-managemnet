@@ -9,6 +9,9 @@ define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'bus_pass_db');
 
+// Set default time zone to Asia/Kolkata (India)
+date_default_timezone_set('Asia/Kolkata');
+
 // Create connection
 $conn = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
 
@@ -20,6 +23,9 @@ if (!$conn) {
 // Set charset to UTF-8
 mysqli_set_charset($conn, "utf8mb4");
 
+// Set MySQL time zone to Asia/Kolkata
+mysqli_query($conn, "SET time_zone = '+05:30'");
+
 // Base URL (adjust if deployed to a subdirectory)
 define('BASE_URL', '/Bus-pass-managemnet');
 define('UPLOAD_PATH', $_SERVER['DOCUMENT_ROOT'] . '/Bus-pass-managemnet/uploads/');
@@ -27,7 +33,7 @@ define('UPLOAD_URL', BASE_URL . '/uploads');
 
 // Application Settings
 define('APP_NAME', 'Bus Pass Management System');
-define('APP_EMAIL', 'admin@buspass.edu');
+define('APP_EMAIL', 'pmpml@pune.gov.in');
 define('APP_PHONE', '+91-9876543210');
 
 // Session configuration
@@ -40,7 +46,27 @@ if (session_status() === PHP_SESSION_NONE) {
  */
 function sanitize($data) {
     global $conn;
-    return mysqli_real_escape_string($conn, htmlspecialchars(strip_tags(trim($data))));
+    return mysqli_real_escape_string($conn, trim($data));
+}
+
+/**
+ * Helper function to decode HTML entities from database-stored data
+ */
+function decode_db_data($data) {
+    if (is_array($data)) {
+        foreach ($data as $key => $value) {
+            $data[$key] = decode_db_data($value);
+        }
+        return $data;
+    }
+    return html_entity_decode(trim($data), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}
+
+/**
+ * Helper function to decode HTML entities and prepare for display
+ */
+function decode_display($data) {
+    return htmlspecialchars(decode_db_data($data), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 }
 
 /**
