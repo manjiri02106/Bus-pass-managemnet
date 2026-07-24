@@ -1,36 +1,6 @@
 <?php
 require_once __DIR__ . '/database.php';
 
-function data_path($file) {
-    return __DIR__ . '/../data/' . $file;
-}
-
-function ensure_data_dir() {
-    $dir = dirname(data_path('users.json'));
-    if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
-    }
-}
-
-function load_json($file, $default = []) {
-    ensure_data_dir();
-    $path = data_path($file);
-    if (!file_exists($path)) {
-        save_json($file, $default);
-        return $default;
-    }
-
-    $content = file_get_contents($path);
-    $decoded = json_decode($content, true);
-    return $decoded ?: $default;
-}
-
-function save_json($file, $data) {
-    ensure_data_dir();
-    $path = data_path($file);
-    file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-}
-
 function page_header($title, $active) {
     $menu = [
         ['Dashboard', 'index.php'],
