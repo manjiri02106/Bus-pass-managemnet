@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bus Pass Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Smart Mobility</p>
+          <h1>Bus Pass Management System</h1>
+        </div>
+        <div class="topbar-badge">Live operations</div>
+      </header>
+
+      <section class="hero-card">
+        <div>
+          <p class="eyebrow">Overview</p>
+          <h2>Monitor passes, routes, and student movement from one control center.</h2>
+          <p>
+            This dashboard gives admins, transport officers, and students a clear view of
+            current demand, route performance, and issue status.
+          </p>
+        </div>
+        <div class="hero-metrics">
+          <div>
+            <strong>1,248</strong>
+            <span>Active passes</span>
+          </div>
+          <div>
+            <strong>94%</strong>
+            <span>On-time rate</span>
+          </div>
+          <div>
+            <strong>18</strong>
+            <span>Routes tracked</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="tabs" aria-label="Dashboard views">
+        <button class="tab-btn active" data-target="admin">Admin Dashboard</button>
+        <button class="tab-btn" data-target="officer">Transport Officer Dashboard</button>
+        <button class="tab-btn" data-target="student">Student Dashboard</button>
+      </section>
+
+      <main>
+        <section class="dashboard-panel active" id="admin">
+          <div class="stats-grid">
+            <article class="stat-card accent-blue">
+              <p>Total applicants</p>
+              <h3>342</h3>
+              <span>+12% this week</span>
+            </article>
+            <article class="stat-card accent-green">
+              <p>Approved passes</p>
+              <h3>289</h3>
+              <span>84% approval rate</span>
+            </article>
+            <article class="stat-card accent-orange">
+              <p>Pending reviews</p>
+              <h3>31</h3>
+              <span>5 urgent cases</span>
+            </article>
+            <article class="stat-card accent-purple">
+              <p>Revenue generated</p>
+              <h3>$12.8K</h3>
+              <span>+8% monthly</span>
+            </article>
+          </div>
+
+          <div class="charts-grid">
+            <article class="chart-card">
+              <div class="card-heading">
+                <h4>Monthly pass demand</h4>
+                <span>Last 6 months</span>
+              </div>
+              <svg viewBox="0 0 320 180" class="line-chart" aria-label="Line chart">
+                <path d="M10 140 C50 112, 90 120, 120 98 S190 62, 220 78 S280 112, 310 40" />
+                <circle cx="310" cy="40" r="6" />
+              </svg>
+            </article>
+
+            <article class="chart-card">
+              <div class="card-heading">
+                <h4>Route usage</h4>
+                <span>Capacity fill</span>
+              </div>
+              <div class="bar-chart">
+                <div class="bar-group"><span>North</span><div class="bar"><i style="height: 82%"></i></div></div>
+                <div class="bar-group"><span>East</span><div class="bar"><i style="height: 64%"></i></div></div>
+                <div class="bar-group"><span>South</span><div class="bar"><i style="height: 91%"></i></div></div>
+                <div class="bar-group"><span>West</span><div class="bar"><i style="height: 73%"></i></div></div>
+              </div>
+            </article>
+
+            <article class="chart-card">
+              <div class="card-heading">
+                <h4>Verification status</h4>
+                <span>Current split</span>
+              </div>
+              <div class="donut-chart" aria-label="Donut chart">
+                <div class="donut-center">
+                  <strong>76%</strong>
+                  <span>Verified</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <article class="panel-card route-panel">
+            <div class="card-heading">
+              <h4>Route statistics</h4>
+              <span>Performance snapshot</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Route</th><th>Trips</th><th>Passengers</th><th>Delay</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>R-12 Central</td><td>42</td><td>1,050</td><td>2 min</td></tr>
+                  <tr><td>R-07 Harbor</td><td>38</td><td>912</td><td>4 min</td></tr>
+                  <tr><td>R-05 University</td><td>45</td><td>1,180</td><td>1 min</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="dashboard-panel" id="officer">
+          <div class="stats-grid">
+            <article class="stat-card accent-blue">
+              <p>Trips today</p>
+              <h3>128</h3>
+              <span>6 in progress</span>
+            </article>
+            <article class="stat-card accent-green">
+              <p>Students scanned</p>
+              <h3>1,092</h3>
+              <span>+19 today</span>
+            </article>
+            <article class="stat-card accent-orange">
+              <p>Issues flagged</p>
+              <h3>14</h3>
+              <span>3 critical</span>
+            </article>
+            <article class="stat-card accent-purple">
+              <p>Route compliance</p>
+              <h3>96%</h3>
+              <span>Excellent</span>
+            </article>
+          </div>
+
+          <div class="charts-grid">
+            <article class="chart-card">
+              <div class="card-heading">
+                <h4>Vehicle health</h4>
+                <span>Fleet readiness</span>
+              </div>
+              <svg viewBox="0 0 320 180" class="line-chart alt" aria-label="Vehicle health chart">
+                <path d="M10 130 C58 108, 110 116, 140 94 S220 56, 250 72 S290 108, 310 60" />
+              </svg>
+            </article>
+
+            <article class="chart-card">
+              <div class="card-heading">
+                <h4>Peak hour demand</h4>
+                <span>Morning vs evening</span>
+              </div>
+              <div class="bar-chart">
+                <div class="bar-group"><span>06:00</span><div class="bar"><i style="height: 78%"></i></div></div>
+                <div class="bar-group"><span>08:00</span><div class="bar"><i style="height: 92%"></i></div></div>
+                <div class="bar-group"><span>12:00</span><div class="bar"><i style="height: 58%"></i></div></div>
+                <div class="bar-group"><span>17:00</span><div class="bar"><i style="height: 88%"></i></div></div>
+              </div>
+            </article>
+
+            <article class="chart-card">
+              <div class="card-heading">
+                <h4>Attendance</h4>
+                <span>Today’s boarding</span>
+              </div>
+              <div class="donut-chart alt" aria-label="Attendance donut chart">
+                <div class="donut-center">
+                  <strong>88%</strong>
+                  <span>Present</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <article class="panel-card route-panel">
+            <div class="card-heading">
+              <h4>Route statistics</h4>
+              <span>Officer dispatch insights</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Bus</th><th>Assigned route</th><th>Students</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Bus 04</td><td>R-12 Central</td><td>96</td><td>On time</td></tr>
+                  <tr><td>Bus 09</td><td>R-07 Harbor</td><td>82</td><td>Delayed</td></tr>
+                  <tr><td>Bus 11</td><td>R-05 University</td><td>104</td><td>Ready</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <section class="dashboard-panel" id="student">
+          <div class="stats-grid">
+            <article class="stat-card accent-blue">
+              <p>My pass status</p>
+              <h3>Active</h3>
+              <span>Valid till Aug 31</span>
+            </article>
+            <article class="stat-card accent-green">
+              <p>Trips used</p>
+              <h3>24</h3>
+              <span>4 this week</span>
+            </article>
+            <article class="stat-card accent-orange">
+              <p>Balance</p>
+              <h3>$18</h3>
+              <span>Top-up due</span>
+            </article>
+            <article class="stat-card accent-purple">
+              <p>Route preference</p>
+              <h3>North Loop</h3>
+              <span>Most used</span>
+            </article>
+          </div>
+
+          <div class="charts-grid">
+            <article class="chart-card">
+              <div class="card-heading">
+                <h4>Weekly travel pattern</h4>
+                <span>Weekdays</span>
+              </div>
+              <svg viewBox="0 0 320 180" class="line-chart alt-2" aria-label="Travel pattern chart">
+                <path d="M10 140 L90 110 L140 124 L190 86 L240 98 L310 58" />
+              </svg>
+            </article>
+
+            <article class="chart-card">
+              <div class="card-heading">
+                <h4>Fare usage</h4>
+                <span>Last 4 weeks</span>
+              </div>
+              <div class="bar-chart">
+                <div class="bar-group"><span>W1</span><div class="bar"><i style="height: 61%"></i></div></div>
+                <div class="bar-group"><span>W2</span><div class="bar"><i style="height: 72%"></i></div></div>
+                <div class="bar-group"><span>W3</span><div class="bar"><i style="height: 88%"></i></div></div>
+                <div class="bar-group"><span>W4</span><div class="bar"><i style="height: 79%"></i></div></div>
+              </div>
+            </article>
+
+            <article class="chart-card">
+              <div class="card-heading">
+                <h4>Pass validity</h4>
+                <span>Remaining days</span>
+              </div>
+              <div class="donut-chart alt-2" aria-label="Pass validity chart">
+                <div class="donut-center">
+                  <strong>73%</strong>
+                  <span>Remaining</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <article class="panel-card route-panel">
+            <div class="card-heading">
+              <h4>Route statistics</h4>
+              <span>Your most traveled routes</span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Route</th><th>Frequency</th><th>Travel time</th><th>Peak time</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>North Loop</td><td>5x/week</td><td>18 min</td><td>08:00</td></tr>
+                  <tr><td>University Link</td><td>4x/week</td><td>22 min</td><td>17:00</td></tr>
+                  <tr><td>Harbor Street</td><td>3x/week</td><td>15 min</td><td>06:30</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
