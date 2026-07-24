@@ -1,5 +1,10 @@
 # 🚌 Bus Pass Management System - Technical Documentation
 
+![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-777BB4?style=flat-square&logo=php&logoColor=white)
+![Database](https://img.shields.io/badge/Database-MySQL%20%7C%20MariaDB-4479A1?style=flat-square&logo=mysql&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+![Build](https://img.shields.io/badge/Build-Passing-brightgreen?style=flat-square)
+
 Welcome to the technical documentation for the **Bus Pass Management System**. This comprehensive guide provides detailed information on the system architecture, database schema, RESTful APIs, security mechanisms, installation procedures, and automated testing suites.
 
 ---
@@ -244,43 +249,45 @@ curl -X GET "http://localhost/Bus-pass-managemnet/api/verify_pass.php?code=VAL-B
 #### Successful & Valid Response (`200 OK`)
 ```json
 {
-  "status": "success",
+  "success": true,
   "valid": true,
-  "message": "Pass is ACTIVE and VALID.",
-  "data": {
+  "message": "Pass Verified: Valid active transit ticket.",
+  "details": {
     "pass_number": "BP-20260721-0001",
-    "passenger_name": "Jane Doe",
-    "profile_pic": "assets/uploads/user_2.jpg",
-    "category": "Student Special",
-    "route_code": "RT-102",
-    "route": "University Campus -> Westside Station",
-    "valid_from": "2026-07-01",
-    "valid_until": "2026-08-01",
-    "status": "approved"
+    "passenger": {
+      "name": "Jane Doe",
+      "email": "jane@gmail.com",
+      "photo": "/Bus-pass-managemnet/assets/uploads/user_2.jpg"
+    },
+    "route": {
+      "code": "RT-102",
+      "source": "University Campus",
+      "destination": "Westside Station"
+    },
+    "tier": "Student Special",
+    "validity": {
+      "starts": "2026-07-01",
+      "expires": "2026-08-01"
+    }
   }
 }
 ```
 
-#### Expired or Invalid Response (`200 OK`)
+#### Expired Response (`200 OK`)
 ```json
 {
-  "status": "success",
+  "success": true,
   "valid": false,
-  "message": "Pass is EXPIRED (Validity ended on 2026-06-01).",
-  "data": {
-    "pass_number": "BP-20260501-0004",
-    "passenger_name": "John Smith",
-    "status": "approved"
-  }
+  "message": "Pass Expired: Validity period ended on Jun 01, 2026."
 }
 ```
 
-#### Error Response (`404 Not Found` / `400 Bad Request`)
+#### Error Response (`400 Bad Request`)
 ```json
 {
-  "status": "error",
+  "success": false,
   "valid": false,
-  "message": "Invalid parameter. 'code' is required."
+  "message": "Missing verification token parameter: code"
 }
 ```
 
