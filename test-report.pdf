@@ -1,0 +1,97 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 2189 >>
+stream
+BT
+/F1 10 Tf
+72 760 Td
+(Student Pass Report) Tj
+ET
+BT
+/F1 10 Tf
+72 748 Td
+(Generated at 2026-07-24 07:18:51) Tj
+ET
+BT
+/F1 10 Tf
+72 736 Td
+(--------------------------------------------------------------------------------------------------------------) Tj
+ET
+BT
+/F1 10 Tf
+72 724 Td
+(ID                   | Student              | Route                | Status               | Issued Date          | Expiry Date          | Renewal Date        ) Tj
+ET
+BT
+/F1 10 Tf
+72 712 Td
+(--------------------------------------------------------------------------------------------------------------) Tj
+ET
+BT
+/F1 10 Tf
+72 700 Td
+(1                    | Asha Verma                     | Route A              | Pending              | 2026-01-05           | 2026-06-30           | 2026-06-15          ) Tj
+ET
+BT
+/F1 10 Tf
+72 688 Td
+(2                    | Rahul Kumar                    | Route B              | Approved             | 2026-02-10           | 2026-07-15           |                     ) Tj
+ET
+BT
+/F1 10 Tf
+72 676 Td
+(3                    | Neha Sharma                    | Route A              | Rejected             | 2026-02-18           | 2026-07-20           |                     ) Tj
+ET
+BT
+/F1 10 Tf
+72 664 Td
+(4                    | Aniket Rao                     | Route C              | Approved             | 2026-03-01           | 2026-08-01           | 2026-07-25          ) Tj
+ET
+BT
+/F1 10 Tf
+72 652 Td
+(5                    | Kavya Patil                    | Route B              | Pending              | 2026-03-16           | 2026-08-16           |                     ) Tj
+ET
+BT
+/F1 10 Tf
+72 640 Td
+(6                    | Mohan Das                      | Route C              | Approved             | 2026-04-03           | 2026-09-01           | 2026-08-10          ) Tj
+ET
+BT
+/F1 10 Tf
+72 628 Td
+(7                    | Pooja Singh                    | Route A              | Pending              | 2026-04-10           | 2026-09-10           | 2026-08-20          ) Tj
+ET
+BT
+/F1 10 Tf
+72 616 Td
+(8                    | Suresh Nair                    | Route D              | Rejected             | 2026-04-24           | 2026-09-24           |                     ) Tj
+ET
+
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000002482 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+2552
+%%EOF
