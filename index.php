@@ -23,11 +23,11 @@ page_header($pageTitle, 'Dashboard');
     </div>
     <div class="card">
         <h3>Portal Name</h3>
-        <p class="value"><?php echo htmlspecialchars($stats['site_name']); ?></p>
+        <p class="value"><?php echo htmlspecialchars($stats['site_name'], ENT_QUOTES, 'UTF-8'); ?></p>
     </div>
     <div class="card">
         <h3>Maintenance Mode</h3>
-        <p class="value"><?php echo htmlspecialchars($stats['maintenance']); ?></p>
+        <p class="value"><?php echo htmlspecialchars($stats['maintenance'], ENT_QUOTES, 'UTF-8'); ?></p>
     </div>
 </div>
 <div class="panel">

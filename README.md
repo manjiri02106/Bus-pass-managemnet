@@ -16,3 +16,5 @@ Use the following credentials:
 1. Place this folder inside the XAMPP htdocs directory.
 2. Start Apache and MySQL.
 3. Open http://localhost/Bus-pass-managemnet/Bus-pass-managemnet/auth.php
+
+The portal uses the JSON files in the `data` directory for its local records and settings.
