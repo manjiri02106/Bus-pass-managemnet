@@ -1,0 +1,409 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+    --star-blue: #1e40ff;
+    --star-blue-dark: #1a36d6;
+    --bg-light: #f4f5f7;
+    --sidebar-bg: #27367f; /* From screenshot it looks like a rich royal blue. Let's use #1e3a8a or similar, wait, screenshot is very vibrant blue: #2838f5 ? Let's use #2e38f6 */
+    --sidebar-bg: #303af6;
+    --sidebar-profile-bg: #1d27c7;
+    --navbar-bg: #ffffff;
+    --text-dark: #1d1e21;
+    --text-muted: #8d9498;
+    --border-color: #ebedf2;
+    
+    --shadow: 0px 4px 15px rgba(0, 0, 0, 0.03);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.star-navbar {
+    background-color: var(--navbar-bg);
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.02);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.star-navbar-brand {
+    display: flex;
+    align-items: center;
+    width: 240px; /* matches sidebar width approx */
+}
+
+/* Staradmin specific branding */
+.star-sidebar .star-sidebar-brand {
+    height: 60px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: white;
+    gap: 10px;
+}
+.star-sidebar .star-sidebar-brand .logo-icon {
+    background: rgba(255,255,255,0.2);
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.2rem;
+}
+
+.star-navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    flex: 1;
+}
+
+.star-navbar-help {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.star-navbar-search {
+    flex: 1;
+    max-width: 400px;
+}
+
+.star-navbar-search input {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    padding: 8px 15px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    border-radius: 4px;
+    outline: none;
+}
+
+.star-navbar-profile {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.star-navbar-icons {
+    display: flex;
+    gap: 20px;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    align-items: center;
+}
+.star-navbar-icons i { cursor: pointer; transition: 0.3s; position: relative; }
+.star-navbar-icons i:hover { color: var(--star-blue); }
+.star-navbar-icons .star-badge-dot {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background: #ff4747;
+    color: white;
+    font-size: 0.6rem;
+    border-radius: 50%;
+    padding: 2px 5px;
+    font-weight: bold;
+}
+.star-navbar-icons .star-badge-dot.green {
+    background: #00d284;
+}
+
+.star-navbar-profile .user-img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+/* Layout Wrapper */
+.star-app-container {
+    display: flex;
+    flex: 1;
+}
+
+/* Sidebar */
+.star-sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 60px);
+}
+
+.star-sidebar-profile {
+    background: var(--sidebar-profile-bg);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin: 10px;
+    border-radius: 8px;
+}
+
+.star-sidebar-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.star-sidebar-profile .details {
+    display: flex;
+    flex-direction: column;
+}
+
+.star-sidebar-profile .name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: white;
+}
+
+.star-sidebar-profile .role {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.7);
+}
+
+.star-sidebar-menu-title {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 15px 25px 5px 25px;
+    text-transform: uppercase;
+}
+
+.star-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.star-nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 25px;
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: 0.3s ease;
+    gap: 15px;
+}
+
+.star-nav-item:hover, .star-nav-item.active {
+    color: white;
+}
+
+.star-nav-item .circle-icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.5);
+}
+
+.star-nav-item.active .circle-icon {
+    background: white;
+    border-color: white;
+}
+
+/* Main Content */
+.star-main-content {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.page-title {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.page-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-left: 10px;
+    font-weight: 400;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-actions .date-range {
+    background: #e4e6f6;
+    padding: 8px 15px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--star-blue-dark);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Staradmin Unified Stats Card */
+.unified-stats-card {
+    background: white;
+    border-radius: 6px;
+    padding: 25px;
+    box-shadow: var(--shadow);
+    display: flex;
+    margin-bottom: 30px;
+    border: 1px solid var(--border-color);
+}
+
+.stat-block {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-right: 1px solid var(--border-color);
+}
+.stat-block:last-child {
+    border-right: none;
+}
+
+.stat-block-info h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 5px;
+}
+.stat-block-info h4 {
+    font-size: 0.9rem;
+    color: var(--star-blue);
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+.stat-block-info p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.stat-sparkline {
+    width: 80px;
+    height: 40px;
+}
+
+/* Cards (Charts & Tables) */
+.card-grid {
+    display: grid;
+    grid-template-columns: 65% 33%;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.white-card {
+    background: white;
+    border-radius: 6px;
+    padding: 25px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.white-card h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--text-dark);
+}
+.white-card p.card-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+}
+
+/* Tables */
+.table-container {
+    background: white;
+    border-radius: 6px;
+    padding: 25px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.table-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-dark);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #f3f3f3;
+}
+
+table th {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text-dark);
+}
+
+table td {
+    font-size: 0.85rem;
+    color: #4a4a4a;
+}
+
+/* Badges and Buttons */
+.star-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+}
+.star-badge-admin { background: #ff4747; }
+.star-badge-officer { background: var(--star-blue); }
+.star-badge-student { background: #00d284; }
+
+.btn-primary {
+    background: var(--star-blue);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+.btn-primary:hover {
+    background: var(--star-blue-dark);
+}

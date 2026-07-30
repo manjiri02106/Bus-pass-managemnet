@@ -1,0 +1,69 @@
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #07111f, #13253e);
+}
+
+.card {
+    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2c7be5, #3ba4ff);
+    border: none;
+}
+
+.chart-box {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+}
+
+.bar-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    height: 220px;
+    padding-top: 10px;
+}
+
+.bar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.bar-item span {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.fill {
+    width: 100%;
+    max-width: 42px;
+    border-radius: 8px 8px 0 0;
+    background: linear-gradient(180deg, #3b82f6, #10b981);
+    min-height: 20px;
+}
+
+.donut-chart {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(#10b981 0 88%, #e2e8f0 88% 100%);
+    display: grid;
+    place-items: center;
+}
+
+.donut-chart span {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    background: white;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    color: #0f172a;
+}

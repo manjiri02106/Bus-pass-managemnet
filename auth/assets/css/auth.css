@@ -1,0 +1,482 @@
+/* ==========================================================================
+   BusPass Auth — Lovable-inspired Crisp Modern Styling (Mobile-First)
+   Clean typography, sharp layout, subtle borders, high contrast.
+   ========================================================================== */
+
+:root {
+  --bp-primary:      #4f46e5;
+  --bp-primary-hover:#4338ca;
+  --bp-ink:          #0f172a;
+  --bp-heading:      #1e293b;
+  --bp-muted:        #64748b;
+  --bp-bg:           #f8fafc;
+  --bp-card-bg:      #ffffff;
+  --bp-border:       #e2e8f0;
+  --bp-border-input: #cbd5e1;
+  --bp-radius:       12px;
+  --bp-radius-sm:    8px;
+}
+
+/* =====================================================================
+   ShaderGradient-style animated mesh — #ff5005 / #dbba95 / #d0bce1
+   Uses real animatable CSS (transform/opacity on positioned orbs)
+   + SVG feTurbulence grain overlay + CSS hue rotation shimmer.
+   ===================================================================== */
+
+/* Orb 1 — Hot orange, top-left drift */
+@keyframes orb1 {
+  0%   { transform: translate(0%,   0%)   scale(1);    opacity: 0.85; }
+  25%  { transform: translate(8%,   12%)  scale(1.08); opacity: 0.75; }
+  50%  { transform: translate(-5%,  20%)  scale(0.95); opacity: 0.9;  }
+  75%  { transform: translate(12%,  5%)   scale(1.05); opacity: 0.8;  }
+  100% { transform: translate(0%,   0%)   scale(1);    opacity: 0.85; }
+}
+/* Orb 2 — Sandy warm, top-right drift */
+@keyframes orb2 {
+  0%   { transform: translate(0%,   0%)   scale(1);    opacity: 0.7; }
+  25%  { transform: translate(-10%, 8%)   scale(1.1);  opacity: 0.6; }
+  50%  { transform: translate(-4%,  18%)  scale(1.02); opacity: 0.75; }
+  75%  { transform: translate(-14%, 3%)   scale(0.95); opacity: 0.65; }
+  100% { transform: translate(0%,   0%)   scale(1);    opacity: 0.7; }
+}
+/* Orb 3 — Soft lavender, bottom-right drift */
+@keyframes orb3 {
+  0%   { transform: translate(0%,  0%)    scale(1);    opacity: 0.6; }
+  25%  { transform: translate(-8%, -12%)  scale(1.05); opacity: 0.55; }
+  50%  { transform: translate(5%,  -20%)  scale(0.9);  opacity: 0.7;  }
+  75%  { transform: translate(-12%,-6%)   scale(1.08); opacity: 0.6;  }
+  100% { transform: translate(0%,  0%)    scale(1);    opacity: 0.6; }
+}
+/* Orb 4 — Deep orange accent, bottom-left drift */
+@keyframes orb4 {
+  0%   { transform: translate(0%,  0%)   scale(1);    opacity: 0.55; }
+  30%  { transform: translate(10%, -8%)  scale(1.06); opacity: 0.45; }
+  60%  { transform: translate(3%,  -15%) scale(0.97); opacity: 0.6;  }
+  100% { transform: translate(0%,  0%)   scale(1);    opacity: 0.55; }
+}
+/* Subtle hue shimmer on the whole panel */
+@keyframes hue-shift {
+  0%   { filter: hue-rotate(0deg)   brightness(1); }
+  50%  { filter: hue-rotate(-12deg) brightness(1.08); }
+  100% { filter: hue-rotate(0deg)   brightness(1); }
+}
+/* Grain flicker — makes static noise feel alive */
+@keyframes grain-flicker {
+  0%, 100% { opacity: 0.18; }
+  50%      { opacity: 0.22; }
+}
+
+.grain-bg {
+  background-color: #0d0503;
+  overflow: hidden;
+  position: relative;
+  animation: hue-shift 20s ease-in-out infinite;
+}
+
+/* Four animated colour orbs */
+.grain-bg .gb-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  will-change: transform;
+}
+.grain-bg .gb-orb-1 {
+  width: 70%;  height: 70%;
+  top: -10%;   left: -10%;
+  background: radial-gradient(circle, #ff5005 0%, #ff5005cc 40%, transparent 70%);
+  animation: orb1 14s ease-in-out infinite;
+}
+.grain-bg .gb-orb-2 {
+  width: 60%;  height: 60%;
+  top: -8%;    right: -8%;
+  background: radial-gradient(circle, #dbba95 0%, #dbba95aa 45%, transparent 70%);
+  animation: orb2 18s ease-in-out infinite;
+}
+.grain-bg .gb-orb-3 {
+  width: 65%;  height: 65%;
+  bottom: -10%; right: -12%;
+  background: radial-gradient(circle, #d0bce1 0%, #d0bce1bb 40%, transparent 70%);
+  animation: orb3 16s ease-in-out infinite;
+}
+.grain-bg .gb-orb-4 {
+  width: 55%;  height: 55%;
+  bottom: -8%; left: -8%;
+  background: radial-gradient(circle, #ff5005 0%, #c03800aa 45%, transparent 70%);
+  animation: orb4 22s ease-in-out infinite;
+}
+
+/* SVG grain overlay */
+.grain-bg::after {
+  content: "";
+  position: absolute;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  opacity: 0.18;
+  pointer-events: none;
+  z-index: 5;
+  animation: grain-flicker 3s ease-in-out infinite;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Validation Style Overrides */
+label:has(input.is-invalid),
+label:has(select.is-invalid) {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 1px #ef4444 !important;
+}
+.was-validated input:invalid ~ .invalid-feedback,
+.was-validated select:invalid ~ .invalid-feedback,
+input.is-invalid ~ .invalid-feedback,
+select.is-invalid ~ .invalid-feedback {
+  display: block !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+
+body.auth-body {
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bp-bg);
+  background-image: radial-gradient(#cbd5e1 0.75px, transparent 0.75px);
+  background-size: 16px 16px;
+  color: var(--bp-ink);
+  position: relative;
+  padding: 32px 16px;
+}
+
+.auth-bg {
+  display: none; /* No floating gradient orbs */
+}
+
+.auth-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-copy {
+  color: var(--bp-muted);
+  font-size: 0.8125rem;
+}
+
+/* ---- Card ---- */
+.auth-card {
+  background: var(--bp-card-bg);
+  border-radius: 16px;
+  border: 1px solid var(--bp-border);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05),
+              0 4px 6px -2px rgba(15, 23, 42, 0.02);
+  overflow: hidden;
+}
+
+/* ---- Brand ---- */
+.brand-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--bp-ink);
+  color: #ffffff;
+  font-size: 1.4rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+}
+
+.auth-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 1.45rem;
+  color: var(--bp-heading);
+}
+
+.auth-subtitle {
+  color: var(--bp-muted);
+  font-size: 0.875rem;
+}
+
+/* ---- Account Type Info Pill (Clean Lovable Style) ---- */
+.account-type-card {
+  background: #f1f5f9;
+  border: 1px solid var(--bp-border);
+  border-radius: var(--bp-radius);
+  padding: 10px 14px;
+}
+
+.account-type-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--bp-radius-sm);
+  background: #e0e7ff;
+  color: var(--bp-primary);
+  display: grid;
+  place-items: center;
+  font-size: 1.05rem;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.account-type-title {
+  font-weight: 600;
+  font-size: 0.86rem;
+  color: var(--bp-heading);
+  line-height: 1.2;
+}
+
+.account-type-subtitle {
+  font-size: 0.76rem;
+  color: var(--bp-muted);
+}
+
+/* ---- Form Controls ---- */
+.form-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 0.35rem;
+}
+
+.form-control, .form-select {
+  border-radius: var(--bp-radius);
+  border: 1px solid var(--bp-border-input);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.9rem;
+  color: var(--bp-ink);
+  background-color: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--bp-primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+  outline: none;
+}
+
+.form-control.is-invalid, .form-select.is-invalid {
+  border-color: #ef4444;
+}
+
+.invalid-feedback {
+  font-size: 0.76rem;
+  color: #dc2626;
+}
+
+.input-group-text {
+  border-radius: var(--bp-radius) 0 0 var(--bp-radius);
+  border: 1px solid var(--bp-border-input);
+  border-right: 0;
+  background: #f8fafc;
+  color: var(--bp-muted);
+  padding-left: 0.85rem;
+  padding-right: 0.85rem;
+}
+
+.input-group > .form-control {
+  border-radius: 0 var(--bp-radius) var(--bp-radius) 0;
+}
+
+.input-group:focus-within .input-group-text {
+  border-color: var(--bp-primary);
+}
+
+/* Password eye toggle */
+.pwd-wrap {
+  position: relative;
+}
+
+.pwd-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: var(--bp-muted);
+  z-index: 5;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.pwd-toggle:hover {
+  color: var(--bp-ink);
+}
+
+/* ---- Checkboxes & Switches ---- */
+.form-check-input {
+  border-radius: 4px;
+  border-color: var(--bp-border-input);
+}
+
+.form-check-input:checked {
+  background-color: var(--bp-primary);
+  border-color: var(--bp-primary);
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+/* ---- Buttons ---- */
+.btn-gradient {
+  background: var(--bp-primary);
+  border: 1px solid transparent;
+  border-radius: var(--bp-radius);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  padding: 0.68rem 1rem;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-gradient:hover {
+  background: var(--bp-primary-hover);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-gradient:active {
+  transform: translateY(0);
+}
+
+.btn-gradient:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-soft {
+  background: #f1f5f9;
+  color: var(--bp-heading);
+  border: 1px solid var(--bp-border);
+  border-radius: var(--bp-radius);
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.btn-soft:hover {
+  background: #e2e8f0;
+  color: var(--bp-ink);
+}
+
+/* ---- Links & Divider ---- */
+.link-muted {
+  color: var(--bp-muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.link-muted:hover {
+  color: var(--bp-primary);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin: 1.25rem 0;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: var(--bp-border);
+}
+
+/* ---- Alert Badges ---- */
+.alert {
+  border-radius: var(--bp-radius);
+  font-size: 0.85rem;
+  border: 1px solid transparent;
+  padding: 0.75rem 1rem;
+}
+
+.alert-danger {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fee2e2;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: #dcfce7;
+}
+
+.alert-info {
+  background: #f0f9ff;
+  color: #075985;
+  border-color: #e0f2fe;
+}
+
+/* Password Strength Meter */
+.strength-meter {
+  height: 4px;
+  border-radius: 99px;
+  background: #e2e8f0;
+  overflow: hidden;
+  margin-top: 0.4rem;
+}
+
+.strength-meter > div {
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.strength-label {
+  font-size: 0.72rem;
+  color: var(--bp-muted);
+  margin-top: 0.25rem;
+}
+
+/* Dashboard Shell Styling */
+.dash-navbar {
+  background: #ffffff;
+  border-bottom: 1px solid var(--bp-border);
+}
+
+.dash-hero {
+  background: var(--bp-ink);
+  border-radius: 16px;
+  color: #ffffff;
+  padding: 2rem;
+}
+
+.stat-card {
+  border: 1px solid var(--bp-border);
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  background: #f1f5f9;
+  color: var(--bp-primary);
+}
+
+@media (max-width: 575.98px) {
+  .auth-card .card-body { padding: 1.5rem !important; }
+  .auth-title { font-size: 1.3rem; }
+}
